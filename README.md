@@ -1,4 +1,10 @@
-# Nu primesc notă pentru că nu am pus titlu și descriere
+# TheEscapist
+
+## Gameplay-ul presupune următoarele elemente principale:
+
+* **Respectarea programului închisorii:** prezența de dimineață, mesele, jobul - pentru a nu stârni suspiciunea gardienilor.
+* **Crafting:** Furi sau faci schimb de obiecte cu alți deținuți. Aceste obiecte de bază le combini pentru a crea unelte necesare evadării.
+* **Planificarea:** Gândirea și punerea în aplicare a unei strategii de evadare.
 
 ### Folosiți template-ul corespunzător grupei voastre!
 
