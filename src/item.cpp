@@ -43,16 +43,6 @@ std::ostream& operator<<(std::ostream& os, const Item &ob)
     return os;
 }
 
-bool Item::Detectare_contrabanda() const
-{
-    return contrabanda;
-}
-
-bool Item::Detectare_mixt() const
-{
-    return (contrabanda && metal);
-}
-
 void Item::sharpen_item()
 {
     if(nume != "Periuta" && nume != "Pieptene") return;
@@ -61,7 +51,7 @@ void Item::sharpen_item()
     metal = false;
 }
 
-std::string Item::GetNume() const
+const std::string& Item::GetNume() const
 {
     return nume;
 }

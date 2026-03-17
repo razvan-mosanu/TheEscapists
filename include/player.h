@@ -13,10 +13,9 @@ private:
 public:
   explicit Player(std::string nume);
   ~Player() = default;
-  bool mort() const { return (viata == 0); }
   void Respawn();
   bool Culege_Item(const Item &obiect);
-  bool Foloseste_Item(const std::string &nume, short uzura);
+  bool Foloseste_Item(const std::string &nume_item, short uzura);
   void Antrenament(short durata);
   void Incasa_Bataie();
   bool CraftItem(const std::string &item1, const std::string &item2, const std::string &rez, bool contrabanda, bool metal);

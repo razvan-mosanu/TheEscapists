@@ -16,10 +16,8 @@ public:
     ~Item();
     bool Este_Contrabanda() const;
     bool Degradare(short procent);
-    bool Detectare_contrabanda() const;
-    bool Detectare_mixt() const;
     void sharpen_item();
-    std::string GetNume() const;
+    const std::string& GetNume() const;
     friend std::ostream& operator<<(std::ostream& os, const Item &ob);
 };
 

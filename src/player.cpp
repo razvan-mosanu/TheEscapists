@@ -31,9 +31,9 @@ bool Player::Culege_Item(const Item &obiect)
   return buzunare.Add_item(obiect);
 }
 
-bool Player::Foloseste_Item(const std::string &nume, short uzura)
+bool Player::Foloseste_Item(const std::string &nume_item, short uzura)
 {
-  return buzunare.Foloseste_Item(nume, uzura);
+  return buzunare.Foloseste_Item(nume_item, uzura);
 }
 
 bool Player::CraftItem(const std::string &item1, const std::string &item2, const std::string &rez, bool contrabanda, bool metal)
