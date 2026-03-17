@@ -1,13 +1,14 @@
 #include "item.h"
 #include <string>
 #include <iostream>
+#include <utility>
 
 Item::Item() : nume("Gol"), durabilitate(0), contrabanda(false), metal(false) {}
 Item::~Item() = default;
 
-Item::Item(const std::string &nume, bool contrabanda, bool metal, short durabilitate)
+Item::Item(std::string nume, bool contrabanda, bool metal, short durabilitate)
 {
-    this->nume = nume;
+    this->nume = std::move(nume);
     this->durabilitate = durabilitate;
     this->contrabanda = contrabanda;
     this->metal = metal;
@@ -20,7 +21,7 @@ bool Item::Este_Contrabanda() const
 
 bool Item::Degradare(short procent)
 {
-    durabilitate -= procent;
+    durabilitate = static_cast<short>(durabilitate - procent);
     if(durabilitate <= 0)
     {
         durabilitate = 0;
@@ -60,3 +61,7 @@ void Item::sharpen_item()
     metal = false;
 }
 
+std::string Item::GetNume() const
+{
+    return nume;
+}

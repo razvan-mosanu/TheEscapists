@@ -4,7 +4,9 @@
 #include <iostream>
 #include <ostream>
 
-Player::Player(const std::string &nume) : nume(nume), buzunare(6)
+#include <utility>
+
+Player::Player(std::string nume_p) : nume(std::move(nume_p)), buzunare(6)
 {
   viata = 15;
   stamina = 100;
@@ -18,9 +20,9 @@ void Player::Respawn()
   stamina = 100;
   heat = 0;
   money /= 2;
-  iq = std::max(10, iq - 10);
-  speed = std::max(10, speed - 10);
-  putere = std::max(10, putere - 10);
+  iq = static_cast<short>(std::max(10, iq - 10));
+  speed = static_cast<short>(std::max(10, speed - 10));
+  putere = static_cast<short>(std::max(10, putere - 10));
   buzunare.Confisca_Contrabanda();
 }
 
@@ -29,13 +31,48 @@ bool Player::Culege_Item(const Item &obiect)
   return buzunare.Add_item(obiect);
 }
 
+bool Player::Foloseste_Item(const std::string &nume, short uzura)
+{
+  return buzunare.Foloseste_Item(nume, uzura);
+}
+
+bool Player::CraftItem(const std::string &item1, const std::string &item2, const std::string &rez, bool contrabanda, bool metal)
+{
+  auto poz1 = static_cast<short>(buzunare.Cauta_Item(item1));
+  if (poz1 == -1) return false;
+  Item it1 = buzunare.GetItem(poz1);
+  buzunare.Sterge_item(poz1);
+  auto poz2 = static_cast<short>(buzunare.Cauta_Item(item2));
+  if (poz2 == -1)
+  {
+    buzunare.Add_item(it1);
+    return false;
+  }
+  buzunare.Sterge_item(poz2);
+  Item obj(rez, contrabanda, metal, 100);
+  buzunare.Add_item(obj);
+  std::cout << nume << " a craftat cu succes: " << rez << "!\n";
+  return true;
+}
+
+void Player::ParticipareApel(bool prezenta)
+{
+  if (!prezenta)
+  {
+    heat = static_cast<short>(std::min(100, heat + 80 + 10));
+    std::cout << nume << " a ratat apelul! Heat-ul a crescut masiv la " << heat << "%.\n";
+    return;
+  }
+  heat = static_cast<short>(std::max(0, heat - 10));
+  std::cout << nume << " a participat la apel.\n";
+}
+
 void Player::Antrenament(short durata)
 {
-  short cost_energie = durata * 5;
-  if (stamina < cost_energie)
-    return;
-  stamina -= cost_energie;
-  putere = std::min(100, putere + durata * 2);
+  auto cost_energie = static_cast<short>(durata * 5);
+  if (stamina < cost_energie)return;
+  stamina = static_cast<short>(stamina - cost_energie);
+  putere = static_cast<short>(std::min(100, putere + durata * 2));
 }
 
 void Player::Incasa_Bataie()

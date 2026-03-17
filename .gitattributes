@@ -2,3 +2,5 @@ ext/** linguist-vendored
 *.pro linguist-vendored
 *.user linguist-vendored
 *.txt linguist-vendored
+LICENSE linguist-generated=true
+README.md linguist-generated=true

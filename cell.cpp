@@ -1,8 +1,11 @@
 #include "cell.h"
+#include "player.h"
 #include <iostream>
 
+Cell::Cell() : numar_celula(0), usa_blocata(false), afis_pe_usa(false), grad_degradare_perete(0), dulap(8) {}
+
 Cell::Cell(short numar_celula) : numar_celula(numar_celula),
-usa_blocata(false), afis_pe_usa(false), dulap(8) {}
+usa_blocata(false), afis_pe_usa(false), grad_degradare_perete(0), dulap(8) {}
 
 
 void Cell::Pune_Afis()
@@ -18,6 +21,26 @@ void Cell::Schimba_Stare_Usa(bool blocata)
 bool Cell::Ascunde_Item_In_Dulap(const Item& ob)
 {
     return dulap.Add_item(ob);
+}
+
+bool Cell::SpargerePerete(Player& p, const std::string& unealta)
+{
+    if (grad_degradare_perete >= 100)
+    {
+        std::cout << "Peretele este deja spart!\n";
+        return false;
+    }
+    bool folosit = p.Foloseste_Item(unealta, 25);
+    if (folosit)
+    {
+        grad_degradare_perete += 34;
+        if(grad_degradare_perete > 100) grad_degradare_perete = 100;
+        std::cout << "Ai lovit peretele! Degradare perete: " << grad_degradare_perete << "%\n";
+        if (grad_degradare_perete == 100) std::cout << "Peretele a fost spart complet!\n";
+        return true;
+    }
+    std::cout << "Nu ai unealta '" << unealta << "' in inventar sau s-a rupt incercand.\n";
+    return false;
 }
 
 int Cell::Perchezitie()
@@ -42,10 +65,11 @@ int Cell::Perchezitie()
 
 std::ostream& operator<<(std::ostream& os, const Cell& c)
 {
-    os << "Celula " << c.numar_celula << "\n";
+    os << "=== Celula " << c.numar_celula << " ===\n";
     os << "Usa blocata: " << (c.usa_blocata ? "DA" : "NU") << "\n";
     os << "Afis pe usa: " << (c.afis_pe_usa ? "DA" : "NU") << "\n";
-    os << "Dulap Celula \n";
+    os << "Perete: " << (c.grad_degradare_perete == 100 ? "SPART (100%)" : std::to_string(c.grad_degradare_perete) + "% spart") << "\n";
+    os << "--- Dulap Celula ---\n";
     os << c.dulap;
     return os;
 }
