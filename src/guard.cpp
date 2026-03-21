@@ -4,11 +4,6 @@
 
 Guard::Guard(std::string nume_g): nume(std::move(nume_g)), obiecte_confiscate(10) {}
 
-void Guard::Patruleaza() const
-{
-    std::cout << "[Guard] " << nume << " patruleaza coridoarele inchisorii.\n";
-}
-
 void Guard::InspecteazaJucator(Player &p)
 {
     std::cout << "[Guard] " << nume << " a oprit jucatorul pentru o inspectie de rutina.\n";
