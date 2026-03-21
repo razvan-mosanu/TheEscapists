@@ -14,7 +14,6 @@ private:
 public:
     explicit Guard(std::string nume);
     ~Guard() = default;
-    void Patruleaza() const;
     void InspecteazaJucator(Player& p);
     void PerchezitieCelula(Cell& c);
     friend std::ostream& operator<<(std::ostream& os, const Guard& g);
