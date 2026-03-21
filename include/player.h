@@ -17,6 +17,7 @@ public:
     void Respawn();
     bool Culege_Item(const Item &obiect);
     short Foloseste_Item(const std::string &nume_item, short uzura);
+    Item Extrage_Item(const std::string &nume_item);
     void Antrenament(short durata);
     void Incasa_Bataie();
     bool CraftItem(const std::string &item1, const std::string &item2, const std::string &rez, bool contrabanda, bool metal);

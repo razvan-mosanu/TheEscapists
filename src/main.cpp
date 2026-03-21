@@ -29,8 +29,9 @@ int main()
         std::cout << "Crafting reusit! Rafa se uita in buzunare:\n";
         std::cout << jucator;
     }
-    std::cout << "\n[ORA 14:00] Se aude un paznic pe hol! Rafa ascunde rapid Furculita in dulap.\n";
-    celula_jucator.Ascunde_Item_In_Dulap(Item("Furculita", true, true, 80));
+    std::cout << "\n[ORA 14:00] Se aude un paznic pe hol! Rafa ascunde rapid Furculita in dulap.";
+    Item furculita_extrasa = jucator.Extrage_Item("Furculita");
+    celula_jucator.Ascunde_Item_In_Dulap(furculita_extrasa);
     std::cout << "\n[ORA 16:00] Suna clopotul pentru apelul de dupa-amiaza, dar Rafa refuza sa iasa din celula.\n";
     jucator.ParticipareApel(false);
     gardian.InspecteazaJucator(jucator);
@@ -41,7 +42,7 @@ int main()
     jucator.Culege_Item(lingura);
     std::cout << "\nStare celula inainte de spart:\n";
     std::cout << celula_jucator;
-    std::cout << "\n-> Rafa loveste peretele cu lingura repetat:\n";
+    std::cout << "\nRafa loveste peretele cu lingura repetat:\n";
     for(int i=0; i<4; i++)
         celula_jucator.SpargerePerete(jucator, "Lingura");
     std::cout << "\n[ORA 23:30] Rafa isi face antrenamentul de noapte si ascute o perie.\n";

@@ -61,6 +61,16 @@ short Inventory::Foloseste_Item(const std::string &nume, short uzura)
     return (static_cast<short>(dur_inainte - dur_dupa));
 }
 
+Item Inventory::Extrage_Item(const std::string &nume)
+{
+    auto poz = static_cast<short>(Cauta_Item(nume));
+    if (poz == -1) return {};
+    Item gasit = inventar[poz];
+    Sterge_item(poz);
+    return gasit;
+}
+
+
 void Inventory::Sterge_item(short poz)
 {
   if(poz < 0 || poz >= item_curent) return;

@@ -15,6 +15,7 @@ public:
     ~Inventory();
     bool Add_item(const Item &obiect);
     short Foloseste_Item(const std::string& nume, short uzura);
+    Item Extrage_Item(const std::string& nume);
     void Sterge_item(short poz);
     void Swap(short poz1, short poz2);
     int Cauta_Item(const std::string& nume) const;
