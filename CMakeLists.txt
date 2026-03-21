@@ -55,6 +55,7 @@ add_executable(${MAIN_EXECUTABLE_NAME}
     src/item.cpp
     src/player.cpp
     src/cell.cpp
+    src/guard.cpp
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

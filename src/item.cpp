@@ -19,6 +19,11 @@ bool Item::Este_Contrabanda() const
     return contrabanda;
 }
 
+short Item::GetDurabilitate() const
+{
+    return durabilitate;
+}
+
 bool Item::Degradare(short procent)
 {
     durabilitate = static_cast<short>(durabilitate - procent);
@@ -32,14 +37,10 @@ bool Item::Degradare(short procent)
 
 std::ostream& operator<<(std::ostream& os, const Item &ob)
 {
-    if(ob.contrabanda && ob.metal==false)
-        os << "[Contrabanda] " << ob.nume << " (" << ob.durabilitate << ")%\n";
-    else if(ob.contrabanda && ob.metal)
-        os << "[Contrabanda Metal] " << ob.nume << " (" << ob.durabilitate << ")%\n";
-    else if(ob.contrabanda == false && ob.metal)
-        os << "[Metal] " << ob.nume << " (" << ob.durabilitate << ")%\n";
-    else
-        os << ob.nume << " (" << ob.durabilitate << ")%\n";
+    if(ob.contrabanda && ob.metal==false) os << "[Contrabanda] " << ob.nume << " (" << ob.durabilitate << ")%\n";
+    else if(ob.contrabanda && ob.metal) os << "[Contrabanda Metal] " << ob.nume << " (" << ob.durabilitate << ")%\n";
+    else if(ob.contrabanda == false && ob.metal) os << "[Metal] " << ob.nume << " (" << ob.durabilitate << ")%\n";
+    else os << ob.nume << " (" << ob.durabilitate << ")%\n";
     return os;
 }
 

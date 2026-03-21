@@ -18,6 +18,7 @@ public:
   ~Cell() = default;
   void Pune_Afis();
   void Schimba_Stare_Usa(bool blocata);
+  short GetNumar() const {return numar_celula;}
   bool Ascunde_Item_In_Dulap(const Item &ob);
   bool SpargerePerete(Player& p, const std::string& unealta);
   int Perchezitie();

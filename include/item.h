@@ -16,6 +16,7 @@ public:
     ~Item();
     bool Este_Contrabanda() const;
     bool Degradare(short procent);
+    short GetDurabilitate() const;
     void sharpen_item();
     const std::string& GetNume() const;
     friend std::ostream& operator<<(std::ostream& os, const Item &ob);

@@ -30,10 +30,11 @@ bool Cell::SpargerePerete(Player& p, const std::string& unealta)
         std::cout << "Peretele este deja spart!\n";
         return false;
     }
-    bool folosit = p.Foloseste_Item(unealta, 25);
-    if (folosit)
+    short folosit = p.Foloseste_Item(unealta, 25);
+    if(folosit > 0)
     {
-        grad_degradare_perete += 34;
+        short degr_adaugata = (folosit * 34) / 25;
+        grad_degradare_perete += degr_adaugata;
         if(grad_degradare_perete > 100) grad_degradare_perete = 100;
         std::cout << "Ai lovit peretele! Degradare perete: " << grad_degradare_perete << "%\n";
         if (grad_degradare_perete == 100) std::cout << "Peretele a fost spart complet!\n";

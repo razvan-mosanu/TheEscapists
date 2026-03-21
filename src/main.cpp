@@ -1,13 +1,15 @@
 #include <iostream>
 #include "cell.h"
 #include "player.h"
+#include "guard.h"
 
 int main()
 {
     std::cout << "====== THE ESCAPISTS: O ZI IN INCHISOARE ======\n\n";
     Cell celula_jucator(101);
     Player jucator("Rafa");
-    std::cout << "Rafa a fost transferat in celula 101.\n";
+    Guard gardian("Sgt. Xslayder");
+    std::cout << "Rafa a fost transferat in celula 101. Acolo patruleaza " << gardian << "\n";
     std::cout << "\n[ORA 08:00] Roll Call!\n";
     jucator.ParticipareApel(true); 
     std::cout << "\n[ORA 10:00] Timp liber. Rafa cauta provizii.\n";
@@ -31,10 +33,12 @@ int main()
     celula_jucator.Ascunde_Item_In_Dulap(Item("Furculita", true, true, 80));
     std::cout << "\n[ORA 16:00] Suna clopotul pentru apelul de dupa-amiaza, dar Rafa refuza sa iasa din celula.\n";
     jucator.ParticipareApel(false);
+    gardian.InspecteazaJucator(jucator);
     std::cout << "\n[ORA 16:15] Din cauza heat-ului mare, gardienii navalesc in celula 101!\n";
-    celula_jucator.Perchezitie();
+    gardian.PerchezitieCelula(celula_jucator);
     std::cout << "\n[ORA 23:00] Perchezitia s-a terminat, Rafa e din nou singur.\n";
-    std::cout << "Rafa are in inventar o lingura si incepe sa zgarie peretele din spatele toaletei.\n";
+    std::cout << "Rafa gaseste o lingura si incepe sa zgarie peretele din spatele toaletei.\n";
+    jucator.Culege_Item(lingura);
     std::cout << "\nStare celula inainte de spart:\n";
     std::cout << celula_jucator;
     std::cout << "\n-> Rafa loveste peretele cu lingura repetat:\n";
