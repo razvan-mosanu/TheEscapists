@@ -88,8 +88,7 @@ void Inventory::Swap(short poz1, short poz2)
 int Inventory::Cauta_Item(const std::string &nume) const
 {
   for (short i = 0; i < item_curent; i++)
-    if (inventar[i].GetNume() == nume)
-      return i;
+    if (inventar[i].GetNume() == nume) return i;
   return -1;
 }
 

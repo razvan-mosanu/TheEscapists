@@ -26,6 +26,7 @@ short Item::GetDurabilitate() const
 
 bool Item::Degradare(short procent)
 {
+    if(procent <= 0) procent = 10;
     durabilitate = static_cast<short>(durabilitate - procent);
     if(durabilitate <= 0)
     {

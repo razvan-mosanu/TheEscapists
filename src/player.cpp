@@ -25,7 +25,8 @@ void Player::Respawn()
   buzunare.Confisca_Contrabanda();
 }
 
-bool Player::Culege_Item(const Item &obiect) {
+bool Player::Culege_Item(const Item &obiect)
+{
   return buzunare.Add_item(obiect);
 }
 
@@ -62,7 +63,7 @@ void Player::ParticipareApel(bool prezenta)
 {
   if (!prezenta)
   {
-    heat = static_cast<short>(std::min(100, heat + 80 + 10));
+    heat = static_cast<short>(std::min(100, heat + 90));
     std::cout << nume << " a ratat apelul! Heat-ul a crescut masiv la " << heat << "%.\n";
     return;
   }
@@ -70,12 +71,14 @@ void Player::ParticipareApel(bool prezenta)
   std::cout << nume << " a participat la apel.\n";
 }
 
-void Player::Antrenament(short durata)
+void Player::Antrenament(short durata, const std::string& categorie)
 {
   auto cost_energie = static_cast<short>(durata * 5);
   if (stamina < cost_energie) return;
   stamina = static_cast<short>(stamina - cost_energie);
-  putere = static_cast<short>(std::min(100, putere + durata * 2));
+  if(categorie == "speed") speed = static_cast<short>(std::min(100, speed + durata * 2));
+  else if(categorie == "iq") iq = static_cast<short>(std::min(100, iq + durata * 2));
+  else putere = static_cast<short>(std::min(100, putere + durata * 2));
 }
 
 void Player::Incasa_Bataie()

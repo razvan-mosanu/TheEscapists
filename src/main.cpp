@@ -46,7 +46,7 @@ int main()
     for(int i=0; i<4; i++)
         celula_jucator.SpargerePerete(jucator, "Lingura");
     std::cout << "\n[ORA 23:30] Rafa isi face antrenamentul de noapte si ascute o perie.\n";
-    jucator.Antrenament(10);
+    jucator.Antrenament(10, "speed");
     Item perie("Periuta", false, false, 100);
     perie.sharpen_item();
     std::cout << "A ascutit peria: " << perie << "\n";
