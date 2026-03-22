@@ -1,6 +1,8 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 #include "inventory.h"
+#include "prison_map.h"
+#include <SFML/Graphics.hpp>
 #include <ostream>
 #include <string>
 
@@ -9,6 +11,10 @@ private:
     short viata, stamina, iq, speed, putere, heat, money;
     std::string nume;
     Inventory buzunare;
+    sf::Texture texture;
+    sf::Sprite sprite;
+    sf::Vector2f poz;
+    float moveSpeed;
 public:
     explicit Player(std::string nume);
     ~Player() = default;
@@ -22,6 +28,10 @@ public:
     void Incasa_Bataie();
     bool CraftItem(const std::string &item1, const std::string &item2, const std::string &rez, bool contrabanda, bool metal);
     void ParticipareApel(bool prezenta);
+    void InitGraphics(const std::string& texturePath, float startX, float startY);
+    void UpdateSFML(float deltaTime, const PrisonMap& harta);
+    void Draw(sf::RenderWindow& window) const;
+    sf::Vector2f GetPoziție() const { return poz; }
     friend std::ostream &operator<<(std::ostream &os, const Player &p);
 };
 

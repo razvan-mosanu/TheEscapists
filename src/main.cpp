@@ -1,66 +1,37 @@
 #include <iostream>
-#include "cell.h"
+#include <SFML/Graphics.hpp>
+#include "prison_map.h"
 #include "player.h"
-#include "guard.h"
+#include <algorithm>
 
 int main()
 {
-    std::cout << "====== THE ESCAPISTS: O ZI IN INCHISOARE ======\n\n";
-    Cell celula_jucator(101);
+    sf::RenderWindow window(sf::VideoMode(800, 600), "The Escapists - GUI");
+    window.setFramerateLimit(60);
+    PrisonMap map;
+    if (!map.Load("assets/prison_map.tmj", "assets/tileset.png")){}
     Player jucator("Rafa");
-    Guard gardian("Sgt. Xslayder");
-    std::cout << "Rafa a fost transferat in celula 101. Acolo patruleaza " << gardian << "\n";
-    std::cout << "\n[ORA 08:00] Roll Call!\n";
-    jucator.ParticipareApel(true); 
-    std::cout << "\n[ORA 10:00] Timp liber. Rafa cauta provizii.\n";
-    Item soseta("Soseta", false, false, 100);
-    Item sapun("Sapun", false, false, 100);
-    Item furculita("Furculita", true, true, 80);
-    Item lingura("Lingura", true, true, 50);
-    jucator.Culege_Item(soseta);
-    jucator.Culege_Item(sapun);
-    jucator.Culege_Item(furculita);
-    jucator.Culege_Item(lingura);
-    std::cout << jucator;
-    std::cout << "\n[ORA 12:00] Rafa merge in baie si improvizeaza o arma.\n";
-    bool succes = jucator.CraftItem("Soseta", "Sapun", "Arma cu Sapun", true, false);
-    if(succes)
+    jucator.InitGraphics("assets/player.png", 50.f, 50.f);
+    sf::Clock clock;
+    while (window.isOpen())
     {
-        std::cout << "Crafting reusit! Rafa se uita in buzunare:\n";
-        std::cout << jucator;
+        float deltaTime = clock.restart().asSeconds();
+        sf::Event event{};
+        while (window.pollEvent(event))
+            if (event.type == sf::Event::Closed) window.close();
+        jucator.UpdateSFML(deltaTime, map);
+        sf::Vector2f playerPos = jucator.GetPoziție();
+        sf::View camera(sf::FloatRect(0.f, 0.f, 320.f, 240.f));
+        float camHalfWidth = camera.getSize().x / 2.f;
+        float camHalfHeight = camera.getSize().y / 2.f;
+        float camX = std::max(camHalfWidth, std::min(playerPos.x, (float)map.GetWidthInPixels() - camHalfWidth));
+        float camY = std::max(camHalfHeight, std::min(playerPos.y, (float)map.GetHeightInPixels() - camHalfHeight));
+        camera.setCenter(camX, camY);
+        window.clear(sf::Color::Black);
+        window.setView(camera);
+        window.draw(map);
+        jucator.Draw(window);
+        window.display();
     }
-    std::cout << "\n[ORA 14:00] Se aude un paznic pe hol! Rafa ascunde rapid Furculita in dulap.";
-    Item furculita_extrasa = jucator.Extrage_Item("Furculita");
-    celula_jucator.Ascunde_Item_In_Dulap(furculita_extrasa);
-    std::cout << "\n[ORA 16:00] Suna clopotul pentru apelul de dupa-amiaza, dar Rafa refuza sa iasa din celula.\n";
-    jucator.ParticipareApel(false);
-    gardian.InspecteazaJucator(jucator);
-    std::cout << "\n[ORA 16:15] Din cauza heat-ului mare, gardienii navalesc in celula 101!\n";
-    gardian.PerchezitieCelula(celula_jucator);
-    std::cout << "\n[ORA 23:00] Perchezitia s-a terminat, Rafa e din nou singur.\n";
-    std::cout << "Rafa gaseste o lingura si incepe sa zgarie peretele din spatele toaletei.\n";
-    jucator.Culege_Item(lingura);
-    std::cout << "\nStare celula inainte de spart:\n";
-    std::cout << celula_jucator;
-    std::cout << "\nRafa loveste peretele cu lingura repetat:\n";
-    for(int i=0; i<4; i++)
-        celula_jucator.SpargerePerete(jucator, "Lingura");
-    std::cout << "\n[ORA 23:30] Rafa isi face antrenamentul de noapte si ascute o perie.\n";
-    jucator.Antrenament(10, "speed");
-    Item perie("Periuta", false, false, 100);
-    perie.sharpen_item();
-    std::cout << "A ascutit peria: " << perie << "\n";
-    celula_jucator.Schimba_Stare_Usa(true);
-    celula_jucator.Pune_Afis();
-    std::cout << "\n[ORA 23:50] Garda il prinde treaz! Rafa incasa o bataie.\n";
-    jucator.Incasa_Bataie();
-    Inventory rule3(2);
-    rule3.Add_item(perie);
-    Inventory copie = rule3;
-    copie.Swap(0, 0);
-    std::cout << "\n====== STARE FINAL ZIUA 1 ======\n";
-    std::cout << jucator;
-    std::cout << celula_jucator;
-    std::cout << "====== END OF DAY ======\n";
     return 0;
 }

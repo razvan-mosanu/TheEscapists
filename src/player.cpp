@@ -1,5 +1,6 @@
 #include "player.h"
 #include "item.h"
+#include <SFML/Window/Keyboard.hpp>
 #include <algorithm>
 #include <iostream>
 #include <ostream>
@@ -11,6 +12,7 @@ Player::Player(std::string nume_p) : nume(std::move(nume_p)), buzunare(6)
   stamina = 100;
   iq = speed = putere = 30;
   heat = money = 0;
+  moveSpeed = 100.f;
 }
 
 void Player::Respawn()
@@ -86,6 +88,48 @@ void Player::Incasa_Bataie()
   viata = 0;
   heat = 100;
   Respawn();
+}
+
+void Player::InitGraphics(const std::string& texturePath, float startX, float startY)
+{
+    if (texture.loadFromFile(texturePath))
+    {
+        sprite.setTexture(texture);
+        sprite.setTextureRect(sf::IntRect(0, 0, 16, 16));
+    }
+    poz = sf::Vector2f(startX, startY);
+    sprite.setPosition(poz);
+    moveSpeed = 100.0f;
+}
+
+void Player::UpdateSFML(float deltaTime, const PrisonMap& harta)
+{
+    sf::Vector2f miscare(0.f, 0.f);
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) miscare.y -= moveSpeed * deltaTime;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) miscare.y += moveSpeed * deltaTime;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) miscare.x -= moveSpeed * deltaTime;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) miscare.x += moveSpeed * deltaTime;
+    sf::Vector2f tryX = poz;
+    tryX.x += miscare.x;
+    if (!harta.IsSolidWall(tryX.x, tryX.y) && !harta.IsSolidWall(tryX.x + 14.5f, tryX.y + 14.5f) &&
+        !harta.IsSolidWall(tryX.x + 14.5f, tryX.y) && !harta.IsSolidWall(tryX.x, tryX.y + 14.5f))
+    {
+        poz.x = tryX.x;
+    }
+    sf::Vector2f tryY = poz;
+    tryY.y += miscare.y;
+    if (!harta.IsSolidWall(poz.x, tryY.y) && !harta.IsSolidWall(poz.x + 14.5f, tryY.y + 14.5f) &&
+        !harta.IsSolidWall(poz.x + 14.5f, tryY.y) && !harta.IsSolidWall(poz.x, tryY.y + 14.5f))
+    {
+        poz.y = tryY.y;
+    }
+    sprite.setPosition(poz);
+}
+
+
+void Player::Draw(sf::RenderWindow& window) const
+{
+    window.draw(sprite);
 }
 
 std::ostream &operator<<(std::ostream &os, const Player &p)
