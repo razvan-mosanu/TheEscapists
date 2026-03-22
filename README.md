@@ -1,4 +1,4 @@
-# TheEscapist
+# TheEscapists
 
 The Escapists este un joc de strategie în care joci rolul unui deținut și scopul tău este să evadezi din diverse închisori.
 
