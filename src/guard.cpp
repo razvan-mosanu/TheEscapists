@@ -10,7 +10,7 @@ void Guard::InspecteazaJucator(Player &p)
     if (p.GetHeat() > 70)
     {
         std::cout << p.GetNume() << " este panicat! " << nume << " il bate si il trimite la infirmerie.\n";
-        p.Incasa_Bataie();
+        p.Incasa_Bataie(p.GetViata());
     }
     else std::cout << "  -> Totul pare in regula momentan.\n";
 }

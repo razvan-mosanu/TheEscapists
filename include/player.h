@@ -13,13 +13,14 @@ public:
     explicit Player(std::string nume);
     ~Player() = default;
     short GetHeat() const { return heat; }
+    short GetViata() const { return viata; }
     const std::string& GetNume() const {return nume;}
     void Respawn();
     bool Culege_Item(const Item &obiect);
     short Foloseste_Item(const std::string &nume_item, short uzura);
     Item Extrage_Item(const std::string &nume_item);
     void Antrenament(short durata, const std::string& categorie);
-    void Incasa_Bataie();
+    void Incasa_Bataie(short damage = 5);
     bool CraftItem(const std::string &item1, const std::string &item2, const std::string &rez, bool contrabanda, bool metal);
     void ParticipareApel(bool prezenta);
     friend std::ostream &operator<<(std::ostream &os, const Player &p);

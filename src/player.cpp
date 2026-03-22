@@ -81,11 +81,16 @@ void Player::Antrenament(short durata, const std::string& categorie)
   else putere = static_cast<short>(std::min(100, putere + durata * 2));
 }
 
-void Player::Incasa_Bataie()
+void Player::Incasa_Bataie(short damage)
 {
-  viata = 0;
-  heat = 100;
-  Respawn();
+    viata = static_cast<short>(std::max(0, viata - damage));
+    heat = 100;
+    std::cout << nume << " a primit o bataie si a pierdut " << damage << "HP! (Viata: " << viata << "/15)\n";
+    if (viata == 0)
+    {
+        std::cout << nume << " nu a mai rezistat si a ajuns la infirmerie!\n";
+        Respawn();
+    }
 }
 
 std::ostream &operator<<(std::ostream &os, const Player &p)
