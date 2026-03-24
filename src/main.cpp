@@ -53,7 +53,7 @@ int main()
     celula_jucator.Schimba_Stare_Usa(true);
     celula_jucator.Pune_Afis();
     std::cout << "\n[ORA 23:50] Garda il prinde treaz! Rafa incasa o bataie pana la lesin.\n";
-    for(int i = 0; i < 2; i++)
+    for(int i = 0; i < 3; i++)
         jucator.Incasa_Bataie();
     Inventory rule3(2);
     rule3.Add_item(perie);
