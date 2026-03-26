@@ -6,23 +6,23 @@
 
 class Player {
 private:
-    short viata, stamina, iq, speed, putere, heat, money;
-    std::string nume;
-    Inventory buzunare;
+    short life, stamina, iq, speed, power, heat, money;
+    std::string name;
+    Inventory pocket;
 public:
-    explicit Player(std::string nume);
+    explicit Player(std::string name);
     ~Player() = default;
-    short GetHeat() const { return heat; }
-    short GetViata() const { return viata; }
-    const std::string& GetNume() const {return nume;}
+    short Get_Heat() const { return heat; }
+    short Get_Life() const { return life; }
+    const std::string& Get_Name() const {return name;}
     void Respawn();
-    bool Culege_Item(const Item &obiect);
-    short Foloseste_Item(const std::string &nume_item, short uzura);
-    Item Extrage_Item(const std::string &nume_item);
-    void Antrenament(short durata, const std::string& categorie);
-    void Incasa_Bataie(short damage = 5);
-    bool CraftItem(const std::string &item1, const std::string &item2, const std::string &rez, bool contrabanda, bool metal);
-    void ParticipareApel(bool prezenta);
+    bool PickUp_Item(const Item &object);
+    short Use_Item(const std::string &name, short wear);
+    Item Extract_Item(const std::string &name);
+    void Training(short duration, const std::string& category);
+    void Get_Beaten(short damage = 5);
+    bool CraftItem(const std::string &item1, const std::string &item2, const std::string &rez, bool contraband, bool metal);
+    void ParticipateCall(bool present);
     friend std::ostream &operator<<(std::ostream &os, const Player &p);
 };
 

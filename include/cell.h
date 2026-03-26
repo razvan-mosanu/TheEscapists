@@ -6,22 +6,22 @@ class Player;
 
 class Cell {
 private:
-  short numar_celula;
-  bool usa_blocata;
-  bool afis_pe_usa;
-  short grad_degradare_perete;
-  Inventory dulap;
+  short cell_number;
+  bool blocked_door;
+  bool poster_on_door;
+  short wall_degradation;
+  Inventory cabinet;
 
 public:
   Cell();
-  explicit Cell(short numar_celula);
+  explicit Cell(short cell_number);
   ~Cell() = default;
-  void Pune_Afis();
-  void Schimba_Stare_Usa(bool blocata);
-  short GetNumar() const {return numar_celula;}
-  bool Ascunde_Item_In_Dulap(const Item &ob);
-  bool SpargerePerete(Player& p, const std::string& unealta);
-  int Perchezitie();
+  void Put_Poster();
+  void Change_Door_Status(bool status);
+  short Get_Cell_Number() const {return cell_number;}
+  bool Hide_Item_In_Cabinet(const Item &ob);
+  bool Break_Wall(Player& p, const std::string& tool);
+  int Search();
   friend std::ostream &operator<<(std::ostream &os, const Cell &c);
 };
 

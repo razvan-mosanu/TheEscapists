@@ -2,29 +2,29 @@
 #include <iostream>
 #include <utility>
 
-Guard::Guard(std::string nume_g): nume(std::move(nume_g)), obiecte_confiscate(10) {}
+Guard::Guard(std::string name_g): name(std::move(name_g)), confiscated_items(10) {}
 
-void Guard::InspecteazaJucator(Player &p)
+void Guard::Inspect_Player(Player &p)
 {
-    std::cout << "[Guard] " << nume << " a oprit jucatorul pentru o inspectie de rutina.\n";
-    if (p.GetHeat() > 70)
+    std::cout << "[Guard] " << name << " stopped the player for a routine inspection.\n";
+    if (p.Get_Heat() > 70)
     {
-        std::cout << p.GetNume() << " este panicat! " << nume << " il bate si il trimite la infirmerie.\n";
-        p.Incasa_Bataie(p.GetViata());
+        std::cout << p.Get_Name() << " is panicked! " << name << " beats him and sends him to the infirmary.\n";
+        p.Get_Beaten(p.Get_Life());
     }
-    else std::cout << "  -> Totul pare in regula momentan.\n";
+    else std::cout << "  -> Everything seems fine for now.\n";
 }
 
-void Guard::PerchezitieCelula(Cell &c)
+void Guard::Search_Cell(Cell &c)
 {
-    std::cout << "[Guard] " << nume << " face o perchezitie la celula " << c.GetNumar() << ".\n";
-    c.Perchezitie();
+    std::cout << "[Guard] " << name << " performs a Search on cell " << c.Get_Cell_Number() << ".\n";
+    c.Search();
 }
 
 std::ostream &operator<<(std::ostream &os, const Guard &g)
 {
-    os << "=== Gardian: " << g.nume << " ===\n";
-    os << "--- Biroul Gardianului (Obiecte Confiscate) ---\n";
-    os << g.obiecte_confiscate;
+    os << "=== Guard: " << g.name << " ===\n";
+    os << "--- Guard's Desk (Confiscated Items) ---\n";
+    os << g.confiscated_items;
     return os;
 }

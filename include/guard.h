@@ -9,13 +9,13 @@
 
 class Guard {
 private:
-    std::string nume;
-    Inventory obiecte_confiscate;
+    std::string name;
+    Inventory confiscated_items;
 public:
-    explicit Guard(std::string nume);
+    explicit Guard(std::string name);
     ~Guard() = default;
-    void InspecteazaJucator(Player& p);
-    void PerchezitieCelula(Cell& c);
+    void Inspect_Player(Player& p);
+    void Search_Cell(Cell& c);
     friend std::ostream& operator<<(std::ostream& os, const Guard& g);
 };
 

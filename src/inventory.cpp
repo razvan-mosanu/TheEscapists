@@ -4,124 +4,124 @@
 
 Inventory::Inventory()
 {
-    capacitate = 6;
-    item_curent = 0;
-    inventar = new Item[capacitate];
+    capacity = 6;
+    curent_item = 0;
+    items = new Item[capacity];
 }
 
-Inventory::Inventory(short capacitate_maxima)
+Inventory::Inventory(short max_capacity)
 {
-    capacitate = capacitate_maxima;
-    item_curent = 0;
-    inventar = new Item[capacitate];
+    capacity = max_capacity;
+    curent_item = 0;
+    items = new Item[capacity];
 }
 
 Inventory::Inventory(const Inventory &other)
 {
-    this->capacitate = other.capacitate;
-    this->item_curent = other.item_curent;
-    this->inventar = new Item[this->capacitate];
-    for (int i = 0; i < other.item_curent; i++)
-        this->inventar[i] = other.inventar[i];
+    this->capacity = other.capacity;
+    this->curent_item = other.curent_item;
+    this->items = new Item[this->capacity];
+    for (int i = 0; i < other.curent_item; i++)
+        this->items[i] = other.items[i];
 }
 
 Inventory &Inventory::operator=(const Inventory &other)
 {
     if (this == &other) return *this;
-    delete[] this->inventar;
-    this->capacitate = other.capacitate;
-    this->item_curent = other.item_curent;
-    this->inventar = new Item[this->capacitate];
-    for (int i = 0; i < other.item_curent; i++)
-        this->inventar[i] = other.inventar[i];
+    delete[] this->items;
+    this->capacity = other.capacity;
+    this->curent_item = other.curent_item;
+    this->items = new Item[this->capacity];
+    for (int i = 0; i < other.curent_item; i++)
+        this->items[i] = other.items[i];
     return *this;
 }
 
 Inventory::~Inventory()
 {
-    delete[] inventar;
-    capacitate = item_curent = 0;
+    delete[] items;
+    capacity = curent_item = 0;
 }
 
-bool Inventory::Add_item(const Item &obiect)
+bool Inventory::Add_Item(const Item &obiect)
 {
-    if (item_curent == capacitate) return false;
-    inventar[item_curent++] = obiect;
+    if (curent_item == capacity) return false;
+    items[curent_item++] = obiect;
     return true;
 }
 
-short Inventory::Foloseste_Item(const std::string &nume, short uzura)
+short Inventory::Use_Item(const std::string &name, short uzura)
 {
-    auto poz = static_cast<short>(Cauta_Item(nume));
+    auto poz = static_cast<short>(Search_Item(name));
     if (poz == -1) return 0;
-    short dur_inainte = inventar[poz].GetDurabilitate();
-    bool intact = inventar[poz].Degradare(uzura);
-    short dur_dupa = inventar[poz].GetDurabilitate();
-    if (!intact) Sterge_item(poz);
+    short dur_inainte = items[poz].Get_Durability();
+    bool intact = items[poz].Degradation(uzura);
+    short dur_dupa = items[poz].Get_Durability();
+    if (!intact) Delete_Item(poz);
     return (static_cast<short>(dur_inainte - dur_dupa));
 }
 
-Item Inventory::Extrage_Item(const std::string &nume)
+Item Inventory::Extract_Item(const std::string &name)
 {
-    auto poz = static_cast<short>(Cauta_Item(nume));
+    auto poz = static_cast<short>(Search_Item(name));
     if (poz == -1) return {};
-    Item gasit = inventar[poz];
-    Sterge_item(poz);
+    Item gasit = items[poz];
+    Delete_Item(poz);
     return gasit;
 }
 
 
-void Inventory::Sterge_item(short poz)
+void Inventory::Delete_Item(short poz)
 {
-  if(poz < 0 || poz >= item_curent) return;
-  for(short i = poz; i < static_cast<short>(item_curent - 1); i++)
-      inventar[i] = inventar[i + 1];
-  item_curent--;
+    if(poz < 0 || poz >= curent_item) return;
+    for(short i = poz; i < static_cast<short>(curent_item - 1); i++)
+        items[i] = items[i + 1];
+    curent_item--;
 }
 
 void Inventory::Swap(short poz1, short poz2)
 {
-  if (poz1 < 0 || poz2 < 0 || poz1 >= item_curent || poz2 >= item_curent) return;
-  std::swap(inventar[poz1], inventar[poz2]);
+    if (poz1 < 0 || poz2 < 0 || poz1 >= curent_item || poz2 >= curent_item) return;
+    std::swap(items[poz1], items[poz2]);
 }
 
-int Inventory::Cauta_Item(const std::string &nume) const
+int Inventory::Search_Item(const std::string &name) const
 {
-  for (short i = 0; i < item_curent; i++)
-    if (inventar[i].GetNume() == nume) return i;
-  return -1;
+    for (short i = 0; i < curent_item; i++)
+        if (items[i].Get_Name() == name) return i;
+    return -1;
 }
 
-Item Inventory::GetItem(short poz) const
+Item Inventory::Get_Item(short poz) const
 {
-  if (poz >= 0 && poz < item_curent) return inventar[poz];
-  return {};
+    if (poz >= 0 && poz < curent_item) return items[poz];
+    return {};
 }
 
 std::ostream &operator<<(std::ostream &os, const Inventory &inv)
 {
-  if (inv.item_curent == 0)
-  {
-    os << "Inventarul este gol!\n";
+    if (inv.curent_item == 0)
+    {
+        os << "curent_item is empty!\n";
+        return os;
+    }
+    os << "curent_item (" << inv.curent_item << "/" << inv.capacity << " slots occupied):\n";
+    for (short i = 0; i < inv.curent_item; i++)
+        os << "  Slot " << i + 1 << ": " << inv.items[i];
     return os;
-  }
-  os << "Inventar (" << inv.item_curent << "/" << inv.capacitate << " sloturi ocupate):\n";
-  for (short i = 0; i < inv.item_curent; i++)
-    os << "  Slot " << i + 1 << ": " << inv.inventar[i];
-  return os;
 }
 
-int Inventory::Confisca_Contrabanda()
+int Inventory::Confiscate_Contraband()
 {
-  int obiecte_confiscate = 0;
-  for (short i = 0; i < item_curent; i++)
-    if (inventar[i].Este_Contrabanda())
-    {
-      obiecte_confiscate++;
-      for (short j = i; j < static_cast<short>(item_curent - 1); j++)
-          inventar[j] = inventar[j + 1];
-      item_curent--;
-      i--;
-    }
-  return obiecte_confiscate;
+    int confiscated_items = 0;
+    for (short i = 0; i < curent_item; i++)
+        if (items[i].Is_Contraband())
+        {
+            confiscated_items++;
+            for (short j = i; j < static_cast<short>(curent_item - 1); j++)
+                items[j] = items[j + 1];
+            curent_item--;
+            i--;
+        }
+    return confiscated_items;
 }

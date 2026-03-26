@@ -3,34 +3,34 @@
 #include <iostream>
 #include <utility>
 
-Item::Item() : nume("Gol"), durabilitate(0), contrabanda(false), metal(false) {}
+Item::Item() : name("Empty"), durability(0), contraband(false), metal(false) {}
 Item::~Item() = default;
 
-Item::Item(std::string nume, bool contrabanda, bool metal, short durabilitate)
+Item::Item(std::string name, bool contraband, bool metal, short durability)
 {
-    this->nume = std::move(nume);
-    this->durabilitate = durabilitate;
-    this->contrabanda = contrabanda;
+    this->name = std::move(name);
+    this->durability = durability;
+    this->contraband = contraband;
     this->metal = metal;
 }
 
-bool Item::Este_Contrabanda() const
+bool Item::Is_Contraband() const
 {
-    return contrabanda;
+    return contraband;
 }
 
-short Item::GetDurabilitate() const
+short Item::Get_Durability() const
 {
-    return durabilitate;
+    return durability;
 }
 
-bool Item::Degradare(short procent)
+bool Item::Degradation(short procent)
 {
     if(procent <= 0) procent = 10;
-    durabilitate = static_cast<short>(durabilitate - procent);
-    if(durabilitate <= 0)
+    durability = static_cast<short>(durability - procent);
+    if(durability <= 0)
     {
-        durabilitate = 0;
+        durability = 0;
         return false;
     }
     return true;
@@ -38,22 +38,22 @@ bool Item::Degradare(short procent)
 
 std::ostream& operator<<(std::ostream& os, const Item &ob)
 {
-    if(ob.contrabanda && ob.metal==false) os << "[Contrabanda] " << ob.nume << " (" << ob.durabilitate << ")%\n";
-    else if(ob.contrabanda && ob.metal) os << "[Contrabanda Metal] " << ob.nume << " (" << ob.durabilitate << ")%\n";
-    else if(ob.contrabanda == false && ob.metal) os << "[Metal] " << ob.nume << " (" << ob.durabilitate << ")%\n";
-    else os << ob.nume << " (" << ob.durabilitate << ")%\n";
+    if(ob.contraband && ob.metal==false) os << "[Contraband] " << ob.name << " (" << ob.durability << ")%\n";
+    else if(ob.contraband && ob.metal) os << "[Metal Contraband] " << ob.name << " (" << ob.durability << ")%\n";
+    else if(ob.contraband == false && ob.metal) os << "[Metal] " << ob.name << " (" << ob.durability << ")%\n";
+    else os << ob.name << " (" << ob.durability << ")%\n";
     return os;
 }
 
-void Item::sharpen_item()
+void Item::Sharpen_Item()
 {
-    if(nume != "Periuta" && nume != "Pieptene") return;
-    nume = "Cutit din " + nume;
-    contrabanda = true;
+    if(name != "Toothbrush" && name != "Comb") return;
+    name = "Knife from " + name;
+    contraband = true;
     metal = false;
 }
 
-const std::string& Item::GetNume() const
+const std::string& Item::Get_Name() const
 {
-    return nume;
+    return name;
 }
