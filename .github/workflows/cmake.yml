@@ -54,6 +54,9 @@ jobs:
         # renovate: datasource=github-tags depName=actions/checkout versioning=loose
         uses: actions/checkout@v6.0.2
 
+      - name: Install packages
+        uses: ./.github/actions/install-packages
+
       - name: Run cppcheck
         uses: ./.github/actions/cppcheck
 
