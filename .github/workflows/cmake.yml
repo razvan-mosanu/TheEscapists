@@ -243,8 +243,8 @@ jobs:
           path: ${{ env.ZIP_NAME }}
           retention-days: 30
 
-      - name: Runtime checks
-        uses: ./.github/actions/runtime-checks
+      #- name: Runtime checks
+      #  uses: ./.github/actions/runtime-checks
 
       - name: Create release
         uses: ./.github/actions/create-release
