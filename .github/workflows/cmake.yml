@@ -182,6 +182,12 @@ jobs:
         # renovate: datasource=github-tags depName=actions/checkout versioning=loose
         uses: actions/checkout@v6.0.2
 
+      - name: Install SFML Linux Dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxrandr-dev libxcursor-dev libudev-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev libegl1-mesa-dev libfreetype6-dev
+
       - name: Set timestamp, zip name, repo visibility
         env:
           GH_TOKEN: ${{ github.token }}
