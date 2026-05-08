@@ -4,7 +4,7 @@ description: 'Install required packages'
 runs:
   using: "composite"
   steps:
-    # Common Linux dependencies + SFML & OpenGL Dependencies
+    # Common Linux dependencies + SFML, OpenGL & X11 Dependencies
     - name: Install Linux Dependencies
       shell: bash
       if: runner.os == 'Linux'
