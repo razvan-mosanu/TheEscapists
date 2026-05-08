@@ -1,145 +1,159 @@
 #include "player.h"
 #include "item.h"
+#include "exceptions.h"
 #include <SFML/Window/Keyboard.hpp>
 #include <algorithm>
 #include <iostream>
 #include <ostream>
 #include <utility>
 
-Player::Player(std::string nume_p) : nume(std::move(nume_p)), buzunare(6)
+Player::Player(std::string nameParam) : Entity(std::move(nameParam)),
+    stamina(100), iq(50), speed(50), heat(0), money(50), inventory(6)
 {
-  viata = 15;
-  stamina = 100;
-  iq = speed = putere = 30;
-  heat = money = 0;
-  moveSpeed = 100.f;
+    health    = 100;
+    maxHealth = 100;
+    power     = 30;
+    moveSpeed = 100.f;
+    inventory.AddItem(Item("Duct Tape", false, false, 0));
+    inventory.AddItem(Item("Shiv", true, true, 20));
+}
+
+void Player::TakeDamage(short amount)
+{
+    if (health <= 0) return;
+    health = static_cast<short>(health - amount);
+    combatTimer = 5.0f;
+    if (health <= 0) health = 0;
 }
 
 void Player::Respawn()
 {
-  viata = 15;
-  stamina = 100;
-  heat = 0;
-  money /= 2;
-  iq = static_cast<short>(std::max(10, iq - 10));
-  speed = static_cast<short>(std::max(10, speed - 10));
-  putere = static_cast<short>(std::max(10, putere - 10));
-  buzunare.Confisca_Contrabanda();
+    health    = 15;
+    stamina   = 100;
+    heat      = 0;
+    money    /= 2;
+    iq        = static_cast<short>(std::max(10, (int)iq - 10));
+    speed     = static_cast<short>(std::max(10, (int)speed - 10));
+    power     = static_cast<short>(std::max(10, (int)power - 10));
+    combatTimer   = 0.f;
+    attackTimer   = 0.f;
+    isKnockedOut  = false;
+    inventory.ConfiscateContraband();
 }
 
-bool Player::Culege_Item(const Item &obiect)
+bool Player::CollectItem(const Item& object)
 {
-  return buzunare.Add_item(obiect);
+    return inventory.AddItem(object);
 }
 
-short Player::Foloseste_Item(const std::string &nume_item, short uzura)
+short Player::UseItem(const std::string& itemName, short wear)
 {
-  return buzunare.Foloseste_Item(nume_item, uzura);
+    return inventory.UseItem(itemName, wear);
 }
 
-Item Player::Extrage_Item(const std::string &nume_item)
+Item Player::ExtractItem(const std::string& itemName)
 {
-    return buzunare.Extrage_Item(nume_item);
+    return inventory.ExtractItem(itemName);
 }
 
-bool Player::CraftItem(const std::string &item1, const std::string &item2, const std::string &rez, bool contrabanda, bool metal)
+bool Player::CraftItem(const std::string& item1, const std::string& item2, const std::string& result, bool isContraband, bool isMetal)
 {
-  auto poz1 = static_cast<short>(buzunare.Cauta_Item(item1));
-  if (poz1 == -1) return false;
-  Item it1 = buzunare.GetItem(poz1);
-  buzunare.Sterge_item(poz1);
-  auto poz2 = static_cast<short>(buzunare.Cauta_Item(item2));
-  if (poz2 == -1)
-  {
-    buzunare.Add_item(it1);
-    return false;
-  }
-  buzunare.Sterge_item(poz2);
-  Item obj(rez, contrabanda, metal, 100);
-  buzunare.Add_item(obj);
-  std::cout << nume << " a craftat cu succes: " << rez << "!\n";
-  return true;
-}
-
-void Player::ParticipareApel(bool prezenta)
-{
-  if (!prezenta)
-  {
-    heat = static_cast<short>(std::min(100, heat + 90));
-    std::cout << nume << " a ratat apelul! Heat-ul a crescut masiv la " << heat << "%.\n";
-    return;
-  }
-  heat = static_cast<short>(std::max(0, heat - 10));
-  std::cout << nume << " a participat la apel.\n";
-}
-
-void Player::Antrenament(short durata, const std::string& categorie)
-{
-  auto cost_energie = static_cast<short>(durata * 5);
-  if (stamina < cost_energie) return;
-  stamina = static_cast<short>(stamina - cost_energie);
-  if(categorie == "speed") speed = static_cast<short>(std::min(100, speed + durata * 2));
-  else if(categorie == "iq") iq = static_cast<short>(std::min(100, iq + durata * 2));
-  else putere = static_cast<short>(std::min(100, putere + durata * 2));
-}
-
-void Player::Incasa_Bataie()
-{
-  viata = 0;
-  heat = 100;
-  Respawn();
-}
-
-void Player::InitGraphics(const std::string& texturePath, float startX, float startY)
-{
-    if (texture.loadFromFile(texturePath))
+    auto pos1 = static_cast<short>(inventory.FindItem(item1));
+    if (pos1 == -1) return false;
+    Item it1 = inventory.GetItem(pos1);
+    inventory.RemoveItem(pos1);
+    auto pos2 = static_cast<short>(inventory.FindItem(item2));
+    if (pos2 == -1)
     {
-        sprite.setTexture(texture);
-        sprite.setTextureRect(sf::IntRect(0, 0, 16, 16));
+        inventory.AddItem(it1);
+        return false;
     }
-    poz = sf::Vector2f(startX, startY);
-    sprite.setPosition(poz);
-    moveSpeed = 100.0f;
+    inventory.RemoveItem(pos2);
+    Item obj(result, isContraband, isMetal, 100);
+    inventory.AddItem(obj);
+    std::cout << name << " successfully crafted: " << result << "!\n";
+    return true;
 }
 
-void Player::UpdateSFML(float deltaTime, const PrisonMap& harta)
+void Player::AttendRollcall(bool present)
 {
-    sf::Vector2f miscare(0.f, 0.f);
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) miscare.y -= moveSpeed * deltaTime;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) miscare.y += moveSpeed * deltaTime;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) miscare.x -= moveSpeed * deltaTime;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) miscare.x += moveSpeed * deltaTime;
-    sf::Vector2f tryX = poz;
-    tryX.x += miscare.x;
-    if (!harta.IsSolidWall(tryX.x, tryX.y) && !harta.IsSolidWall(tryX.x + 14.5f, tryX.y + 14.5f) &&
-        !harta.IsSolidWall(tryX.x + 14.5f, tryX.y) && !harta.IsSolidWall(tryX.x, tryX.y + 14.5f))
+    if (!present)
     {
-        poz.x = tryX.x;
+        heat = static_cast<short>(std::min(100, (int)heat + 90));
+        std::cout << name << " missed rollcall! Heat increased massively to " << heat << "%.\n";
+        return;
     }
-    sf::Vector2f tryY = poz;
-    tryY.y += miscare.y;
-    if (!harta.IsSolidWall(poz.x, tryY.y) && !harta.IsSolidWall(poz.x + 14.5f, tryY.y + 14.5f) &&
-        !harta.IsSolidWall(poz.x + 14.5f, tryY.y) && !harta.IsSolidWall(poz.x, tryY.y + 14.5f))
-    {
-        poz.y = tryY.y;
-    }
-    sprite.setPosition(poz);
+    heat = static_cast<short>(std::max(0, (int)heat - 10));
+    std::cout << name << " attended rollcall.\n";
 }
 
+void Player::Train(short duration, const std::string& category)
+{
+    auto energyCost = static_cast<short>(duration * 5);
+    if (stamina < energyCost) return;
+    stamina = static_cast<short>(stamina - energyCost);
+    if(category == "speed") speed = static_cast<short>(std::min(100, speed + duration * 2));
+    else if(category == "iq") iq = static_cast<short>(std::min(100, iq + duration * 2));
+    else power = static_cast<short>(std::min(100, power + duration * 2));
+}
+
+void Player::TakeBeating()
+{
+    Respawn();
+}
+
+void Player::Update(float deltaTime, const PrisonMap& map)
+{
+    BaseUpdate(deltaTime);
+    sf::Vector2f movement(0.f, 0.f);
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) movement.y -= moveSpeed * deltaTime;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) movement.y += moveSpeed * deltaTime;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) movement.x -= moveSpeed * deltaTime;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) movement.x += moveSpeed * deltaTime;
+    sf::Vector2f tryX = position;
+    tryX.x += movement.x;
+
+    //hitbox
+    float left   = 3.f;
+    float right  = 13.f;
+    float top    = 14.f;
+    float bottom = 22.f;
+
+    if (!map.IsSolidWall(tryX.x + left,  tryX.y + top)    &&
+        !map.IsSolidWall(tryX.x + right, tryX.y + bottom) &&
+        !map.IsSolidWall(tryX.x + right, tryX.y + top)    &&
+        !map.IsSolidWall(tryX.x + left,  tryX.y + bottom))
+    {
+        position.x = tryX.x;
+    }
+    sf::Vector2f tryY = position;
+    tryY.y += movement.y;
+    if (!map.IsSolidWall(position.x + left,  tryY.y + top)    &&
+        !map.IsSolidWall(position.x + right, tryY.y + bottom) &&
+        !map.IsSolidWall(position.x + right, tryY.y + top)    &&
+        !map.IsSolidWall(position.x + left,  tryY.y + bottom))
+    {
+        position.y = tryY.y;
+    }
+    sprite.setPosition(position);
+}
 
 void Player::Draw(sf::RenderWindow& window) const
 {
     window.draw(sprite);
 }
 
-std::ostream &operator<<(std::ostream &os, const Player &p)
+std::shared_ptr<Entity> Player::Clone() const
 {
-  os << "=== Jucator: " << p.nume << " ===\n";
-  os << "HP: " << p.viata << "/15 | Energie: " << p.stamina << "/100\n";
-  os << "STR: " << p.putere << " | SPD: " << p.speed << " | IQ: " << p.iq
-     << "\n";
-  os << "Heat: " << p.heat << "% | Bani: " << p.money << "$\n";
-  os << "--- Buzunare ---\n";
-  os << p.buzunare;
-  return os;
+    return std::make_shared<Player>(*this);
+}
+
+void Player::Print(std::ostream& os) const
+{
+    os << "=== Player: " << name << " ===\n";
+    os << "HP: " << health << "/" << maxHealth << " | Energy: " << stamina << "/100\n";
+    os << "STR: " << power << " | SPD: " << speed << " | IQ: " << iq << "\n";
+    os << "Heat: " << heat << "% | Money: " << money << "$\n";
+    os << "--- Inventory ---\n";
+    os << inventory;
 }

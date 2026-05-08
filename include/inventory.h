@@ -2,26 +2,33 @@
 #define INVENTORY_H
 #include "item.h"
 #include <ostream>
+#include <string>
+#include <vector>
 
-class Inventory {
+class Inventory
+{
 private:
-    Item *inventar;
-    short capacitate, item_curent;
+    Item *items;
+    short capacity, currentItemCount;
 public:
     Inventory();
     Inventory(const Inventory &other);
-    explicit Inventory(short capacitate_maxima);
+    explicit Inventory(short maxCapacity);
     Inventory &operator=(const Inventory &other);
     ~Inventory();
-    bool Add_item(const Item &obiect);
-    short Foloseste_Item(const std::string& nume, short uzura);
-    Item Extrage_Item(const std::string& nume);
-    void Sterge_item(short poz);
-    void Swap(short poz1, short poz2);
-    int Cauta_Item(const std::string& nume) const;
-    Item GetItem(short poz) const;
+    bool AddItem(const Item &object);
+    short UseItem(const std::string& name, short wear);
+    Item ExtractItem(const std::string& name);
+    void RemoveItem(short pos);
+    void Swap(short pos1, short pos2);
+    int FindItem(const std::string& name) const;
+    Item GetItem(short pos) const;
+    short GetCount() const { return currentItemCount; }
+    short GetCapacity() const { return capacity; }
+    std::vector<Item> GetItems() const;
+    void SetItems(const std::vector<Item>& newItems);
     friend std::ostream &operator<<(std::ostream &os, const Inventory &inv);
-    int Confisca_Contrabanda();
+    int ConfiscateContraband();
 };
 
 #endif // INVENTORY_H

@@ -50,6 +50,10 @@ add_executable(${MAIN_EXECUTABLE_NAME}
     src/cell.cpp
     src/guard.cpp
     src/prison_map.cpp
+    src/entity.cpp
+    src/inmate.cpp
+    include/exceptions.h
+    src/exceptions.cpp
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

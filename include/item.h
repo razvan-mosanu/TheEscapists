@@ -6,19 +6,19 @@
 class Item
 {
 private:
-    std::string nume;
-    short durabilitate;
-    bool contrabanda;
-    bool metal;
+    std::string name;
+    short durability;
+    bool isContraband;
+    bool isMetal;
 public:
     Item();
-    Item(std::string nume, bool contrabanda, bool metal, short durabilitate=100);
+    Item(std::string name, bool isContraband, bool isMetal, short durability=100);
     ~Item();
-    bool Este_Contrabanda() const;
-    bool Degradare(short procent);
-    short GetDurabilitate() const;
-    void sharpen_item();
-    const std::string& GetNume() const;
+    bool IsContraband() const;
+    bool Degrade(short percent);
+    short GetDurability() const;
+    void SharpenItem();
+    const std::string& GetName() const;
     friend std::ostream& operator<<(std::ostream& os, const Item &ob);
 };
 

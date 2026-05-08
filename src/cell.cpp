@@ -1,76 +1,73 @@
 #include "cell.h"
+#include "exceptions.h"
 #include "player.h"
 #include <iostream>
 
-Cell::Cell() : numar_celula(0), usa_blocata(false), afis_pe_usa(false), grad_degradare_perete(0), dulap(8) {}
 
-Cell::Cell(short numar_celula) : numar_celula(numar_celula),
-usa_blocata(false), afis_pe_usa(false), grad_degradare_perete(0), dulap(8) {}
+Cell::Cell():
+    cellNumber(0), isDoorLocked(false),
+    hasPosterOnDoor(false), wallDamage(0),
+    cabinet(8) {}
 
+Cell::Cell(short cellNumber):
+    cellNumber(cellNumber), isDoorLocked(false),
+    hasPosterOnDoor(false),
+    wallDamage(0), cabinet(8) {}
 
-void Cell::Pune_Afis()
+void Cell::PlacePoster() { hasPosterOnDoor = true; }
+
+void Cell::ChangeDoorState(bool locked) { isDoorLocked = locked; }
+
+bool Cell::HideItemInCabinet(const Item &ob) { return cabinet.AddItem(ob); }
+
+bool Cell::BreakWall(Player &p, const std::string &tool)
 {
-    afis_pe_usa = true;
-}
-
-void Cell::Schimba_Stare_Usa(bool blocata)
-{
-    usa_blocata = blocata;
-}
-
-bool Cell::Ascunde_Item_In_Dulap(const Item& ob)
-{
-    return dulap.Add_item(ob);
-}
-
-bool Cell::SpargerePerete(Player& p, const std::string& unealta)
-{
-    if (grad_degradare_perete >= 100)
+    if (wallDamage >= 100)
     {
-        std::cout << "Peretele este deja spart!\n";
+        std::cout << "The wall is already broken!\n";
         return false;
     }
-    short folosit = p.Foloseste_Item(unealta, 25);
-    if(folosit > 0)
+    short used = p.UseItem(tool, 25);
+    if (used > 0)
     {
-        auto degr_adaugata = static_cast<short>((folosit * 34) / 25);
-        grad_degradare_perete = static_cast<short>(grad_degradare_perete + degr_adaugata);
-        if(grad_degradare_perete > 100) grad_degradare_perete = 100;
-        std::cout << "Ai lovit peretele! Degradare perete: " << grad_degradare_perete << "%\n";
-        if (grad_degradare_perete == 100) std::cout << "Peretele a fost spart complet!\n";
+        auto damageAdded = static_cast<short>((used * 34) / 25);
+        wallDamage = static_cast<short>(wallDamage + damageAdded);
+        if (wallDamage > 100) wallDamage = 100;
+        std::cout << "You hit the wall! Wall damage: " << wallDamage << "%\n";
+        if (wallDamage == 100) std::cout << "The wall has been completely broken!\n";
         return true;
     }
-    std::cout << "Nu ai unealta '" << unealta << "' in inventar sau s-a rupt incercand.\n";
+    std::cout << "You don't have the tool '" << tool << "' in your inventory or it broke while trying.\n";
     return false;
 }
 
-int Cell::Perchezitie()
+int Cell::SearchCell()
 {
-    int suspiciune = 0;
-    std::cout << "Gardian in Celula " << numar_celula << " face perchezitie!\n";
-    if (afis_pe_usa)
+    int suspicion = 0;
+    std::cout << "Guard in Cell " << cellNumber << " is searching!\n";
+    if (hasPosterOnDoor)
     {
-        std::cout << "Afis de pe gratii scos! (Penalizare)\n";
-        afis_pe_usa = false;
-        suspiciune += 10;
+        std::cout << "Poster removed from bars! (Penalty)\n";
+        hasPosterOnDoor = false;
+        suspicion += 10;
     }
-    int iteme_confiscate = dulap.Confisca_Contrabanda();
-    if (iteme_confiscate > 0)
+    int itemsConfiscated = cabinet.ConfiscateContraband();
+    if (itemsConfiscated > 0)
     {
-        std::cout << "S-au gasit " << iteme_confiscate << " obiecte de contrabanda in dulap!\n";
-        suspiciune += (iteme_confiscate * 15);
+        std::cout << "Found " << itemsConfiscated << " contraband items in the cabinet!\n";
+        suspicion += (itemsConfiscated * 15);
     }
-    else std::cout << "You are not clean but i can not prove it.\n";
-    return suspiciune;
+    else std::cout << "You are not clean but I cannot prove it.\n";
+    return suspicion;
 }
 
-std::ostream& operator<<(std::ostream& os, const Cell& c)
+std::ostream &operator<<(std::ostream &os, const Cell &c)
 {
-    os << "=== Celula " << c.numar_celula << " ===\n";
-    os << "Usa blocata: " << (c.usa_blocata ? "DA" : "NU") << "\n";
-    os << "Afis pe usa: " << (c.afis_pe_usa ? "DA" : "NU") << "\n";
-    os << "Perete: " << (c.grad_degradare_perete == 100 ? "SPART (100%)" : std::to_string(c.grad_degradare_perete) + "% spart") << "\n";
-    os << "--- Dulap Celula ---\n";
-    os << c.dulap;
+    os << "=== Cell " << c.cellNumber << " ===\n";
+    os << "Door locked: " << (c.isDoorLocked ? "YES" : "NO") << "\n";
+    os << "Poster on door: " << (c.hasPosterOnDoor ? "YES" : "NO") << "\n";
+    os << "Wall: " << (c.wallDamage == 100 ? "BROKEN (100%)" : std::to_string(c.wallDamage)) + "% broken.\n";
+    os << "--- Cell Cabinet ---\n";
+    os << c.cabinet;
     return os;
 }

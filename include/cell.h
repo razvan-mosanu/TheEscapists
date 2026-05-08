@@ -6,23 +6,23 @@ class Player;
 
 class Cell {
 private:
-  short numar_celula;
-  bool usa_blocata;
-  bool afis_pe_usa;
-  short grad_degradare_perete;
-  Inventory dulap;
+    short cellNumber;
+    bool isDoorLocked;
+    bool hasPosterOnDoor;
+    short wallDamage;
+    Inventory cabinet;
 
 public:
-  Cell();
-  explicit Cell(short numar_celula);
-  ~Cell() = default;
-  void Pune_Afis();
-  void Schimba_Stare_Usa(bool blocata);
-  short GetNumar() const {return numar_celula;}
-  bool Ascunde_Item_In_Dulap(const Item &ob);
-  bool SpargerePerete(Player& p, const std::string& unealta);
-  int Perchezitie();
-  friend std::ostream &operator<<(std::ostream &os, const Cell &c);
+    Cell();
+    explicit Cell(short cellNumber);
+    ~Cell() = default;
+    void PlacePoster();
+    void ChangeDoorState(bool locked);
+    short GetNumber() const {return cellNumber;}
+    bool HideItemInCabinet(const Item &ob);
+    bool BreakWall(Player& p, const std::string& tool);
+    int SearchCell();
+    friend std::ostream &operator<<(std::ostream &os, const Cell &c);
 };
 
 #endif // CELL_H

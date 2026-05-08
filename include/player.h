@@ -2,37 +2,46 @@
 #define PLAYER_H
 #include "inventory.h"
 #include "prison_map.h"
+#include "entity.h"
 #include <SFML/Graphics.hpp>
 #include <ostream>
 #include <string>
+#include <memory>
+#include <algorithm>
 
-class Player {
+static constexpr float PLAYER_ATTACK_COOLDOWN = 0.8f;
+
+class Player : public Entity
+{
 private:
-    short viata, stamina, iq, speed, putere, heat, money;
-    std::string nume;
-    Inventory buzunare;
-    sf::Texture texture;
-    sf::Sprite sprite;
-    sf::Vector2f poz;
-    float moveSpeed;
+    short stamina, iq, speed, heat, money;
+    Inventory inventory;
+
 public:
-    explicit Player(std::string nume);
-    ~Player() = default;
+    explicit Player(std::string name);
+    ~Player() override = default;
+    Inventory& GetInventory() { return inventory; }
+    short GetStamina() const { return stamina; }
+    short GetMoney() const { return money; }
     short GetHeat() const { return heat; }
-    const std::string& GetNume() const {return nume;}
+    void SetHeat(short value) { heat = std::clamp(value, (short)0, (short)100); }
+    void SetHealth(short h) { health = h; }
+    void TakeDamage(short amount) override;
     void Respawn();
-    bool Culege_Item(const Item &obiect);
-    short Foloseste_Item(const std::string &nume_item, short uzura);
-    Item Extrage_Item(const std::string &nume_item);
-    void Antrenament(short durata, const std::string& categorie);
-    void Incasa_Bataie();
-    bool CraftItem(const std::string &item1, const std::string &item2, const std::string &rez, bool contrabanda, bool metal);
-    void ParticipareApel(bool prezenta);
-    void InitGraphics(const std::string& texturePath, float startX, float startY);
-    void UpdateSFML(float deltaTime, const PrisonMap& harta);
-    void Draw(sf::RenderWindow& window) const;
-    sf::Vector2f GetPoziție() const { return poz; }
-    friend std::ostream &operator<<(std::ostream &os, const Player &p);
+    bool CollectItem(const Item &object);
+    short UseItem(const std::string &itemName, short wear);
+    Item ExtractItem(const std::string &itemName);
+    void Train(short duration, const std::string& category);
+    void TakeBeating();
+    bool CraftItem(const std::string &item1, const std::string &item2, const std::string &result, bool isContraband, bool isMetal);
+    void AttendRollcall(bool present);
+
+    void Update(float deltaTime, const PrisonMap& map) override;
+    void Draw(sf::RenderWindow& window) const override;
+    std::shared_ptr<Entity> Clone() const override;
+
+protected:
+    void Print(std::ostream& os) const override;
 };
 
 #endif // PLAYER_H
