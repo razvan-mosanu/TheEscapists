@@ -105,35 +105,46 @@ void Player::TakeBeating()
 void Player::Update(float deltaTime, const PrisonMap& map)
 {
     BaseUpdate(deltaTime);
-    sf::Vector2f movement(0.f, 0.f);
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) movement.y -= moveSpeed * deltaTime;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) movement.y += moveSpeed * deltaTime;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) movement.x -= moveSpeed * deltaTime;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) movement.x += moveSpeed * deltaTime;
-    sf::Vector2f tryX = position;
-    tryX.x += movement.x;
-
+    sf::Vector2f moveDir(0.f, 0.f);
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) moveDir.y -= 1.f;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) moveDir.y += 1.f;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) moveDir.x -= 1.f;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) moveDir.x += 1.f;
+    if (moveDir.x != 0.f || moveDir.y != 0.f)
+    {
+        float length = std::sqrt(moveDir.x * moveDir.x + moveDir.y * moveDir.y);
+        moveDir /= length;
+    }
+    sf::Vector2f movement = moveDir * moveSpeed * deltaTime;
     //hitbox
     float left   = 3.f;
     float right  = 13.f;
-    float top    = 14.f;
+    float top    = 10.f;
     float bottom = 22.f;
 
-    if (!map.IsSolidWall(tryX.x + left,  tryX.y + top)    &&
-        !map.IsSolidWall(tryX.x + right, tryX.y + bottom) &&
-        !map.IsSolidWall(tryX.x + right, tryX.y + top)    &&
-        !map.IsSolidWall(tryX.x + left,  tryX.y + bottom))
+    // x-colision
+    if (movement.x != 0.f)
     {
-        position.x = tryX.x;
+        float nextX = position.x + movement.x;
+        if (!map.IsSolidWall(nextX + left,  position.y + top)    &&
+            !map.IsSolidWall(nextX + right, position.y + top)    &&
+            !map.IsSolidWall(nextX + left,  position.y + bottom) &&
+            !map.IsSolidWall(nextX + right, position.y + bottom))
+        {
+            position.x = nextX;
+        }
     }
-    sf::Vector2f tryY = position;
-    tryY.y += movement.y;
-    if (!map.IsSolidWall(position.x + left,  tryY.y + top)    &&
-        !map.IsSolidWall(position.x + right, tryY.y + bottom) &&
-        !map.IsSolidWall(position.x + right, tryY.y + top)    &&
-        !map.IsSolidWall(position.x + left,  tryY.y + bottom))
+    //y-colision
+    if (movement.y != 0.f)
     {
-        position.y = tryY.y;
+        float nextY = position.y + movement.y;
+        if (!map.IsSolidWall(position.x + left,  nextY + top)    &&
+            !map.IsSolidWall(position.x + right, nextY + top)    &&
+            !map.IsSolidWall(position.x + left,  nextY + bottom) &&
+            !map.IsSolidWall(position.x + right, nextY + bottom))
+        {
+            position.y = nextY;
+        }
     }
     sprite.setPosition(position);
 }

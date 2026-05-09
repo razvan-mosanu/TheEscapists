@@ -3,38 +3,35 @@
 #include <utility>
 #include "exceptions.h"
 
-Inventory::Inventory()
+Inventory::Inventory():
+    capacity(6),
+    currentItemCount(0),
+    items(new Item[6]) {}
+
+Inventory::Inventory(short maxCapacity):
+    capacity(maxCapacity), currentItemCount(0),
+    items(new Item[maxCapacity]) {}
+
+Inventory::Inventory(const Inventory &other):
+    capacity(other.capacity),
+    currentItemCount(other.currentItemCount),
+    items(new Item[other.capacity])
 {
-    capacity = 6;
-    currentItemCount = 0;
-    items = new Item[capacity];
+    for (short i = 0; i < currentItemCount; i++)
+        items[i] = other.items[i];
 }
 
-Inventory::Inventory(short maxCapacity)
+void swap(Inventory& first, Inventory& second) noexcept
 {
-    capacity = maxCapacity;
-    currentItemCount = 0;
-    items = new Item[capacity];
+    using std::swap;
+    swap(first.capacity, second.capacity);
+    swap(first.currentItemCount, second.currentItemCount);
+    swap(first.items, second.items);
 }
 
-Inventory::Inventory(const Inventory &other)
+Inventory& Inventory::operator=(Inventory other)
 {
-    this->capacity = other.capacity;
-    this->currentItemCount = other.currentItemCount;
-    this->items = new Item[this->capacity];
-    for (int i = 0; i < other.currentItemCount; i++)
-        this->items[i] = other.items[i];
-}
-
-Inventory &Inventory::operator=(const Inventory &other)
-{
-    if (this == &other) return *this;
-    delete[] this->items;
-    this->capacity = other.capacity;
-    this->currentItemCount = other.currentItemCount;
-    this->items = new Item[this->capacity];
-    for (int i = 0; i < other.currentItemCount; i++)
-        this->items[i] = other.items[i];
+    swap(*this, other);
     return *this;
 }
 
@@ -59,7 +56,7 @@ short Inventory::UseItem(const std::string &name, short wear)
     bool intact = items[pos].Degrade(wear);
     short durAfter = items[pos].GetDurability();
     if (!intact) RemoveItem(pos);
-    return (static_cast<short>(durBefore - durAfter));
+    return static_cast<short>(durBefore - durAfter);
 }
 
 Item Inventory::ExtractItem(const std::string &name)
@@ -107,10 +104,8 @@ void Inventory::SetItems(const std::vector<Item>& newItems)
 {
     currentItemCount = 0;
     for (const auto& item : newItems)
-    {
         if (currentItemCount < capacity)
             items[currentItemCount++] = item;
-    }
 }
 
 std::ostream &operator<<(std::ostream &os, const Inventory &inv)
@@ -130,6 +125,7 @@ int Inventory::ConfiscateContraband()
 {
     int confiscatedItems = 0;
     for (short i = 0; i < currentItemCount; i++)
+    {
         if (items[i].IsContraband())
         {
             confiscatedItems++;
@@ -138,5 +134,6 @@ int Inventory::ConfiscateContraband()
             currentItemCount--;
             i--;
         }
+    }
     return confiscatedItems;
 }

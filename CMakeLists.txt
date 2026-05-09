@@ -52,8 +52,8 @@ add_executable(${MAIN_EXECUTABLE_NAME}
     src/prison_map.cpp
     src/entity.cpp
     src/inmate.cpp
-    include/exceptions.h
     src/exceptions.cpp
+    src/game_manager.cpp
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

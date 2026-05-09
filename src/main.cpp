@@ -1,44 +1,79 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
-#include "prison_map.h"
+#include "game_manager.h"
 #include "player.h"
-#include <algorithm>
+#include "guard.h"
+#include "inmate.h"
+#include "exceptions.h"
+
+
+/**
+ * mostenire(bifat)
+ * funcții virtuale (pure) apelate prin pointeri de bază
+ * din clasa care conține atributul de tip pointer de bază(bifat)
+ * constructori virtuali (clone) (bifat)
+ * interfata non-virtuala (bifat)
+ * apelare constructori (bifat)
+ * clasa cu pointer la baza cu derivate (bifat)
+ *
+ * Dynamic_cast / downcast: (bifat)
+ * smart pointers (bifat)
+ * functii si atribute statice (bifat)
+ * stl (bifat)
+ * const (bifat)
+ */
+
+static sf::Vector2f tile(float col, float row)
+{
+    return {col * 16.f + 8.f, row * 16.f + 8.f};
+}
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(800, 600), "The Escapists - GUI");
-    window.setFramerateLimit(60);
-    PrisonMap map;
-    if (!map.Load("assets/prison_map.tmj", "assets/tileset.png"))
+    try
     {
-        std::cerr << "not good\n";
-        return -1;
+        sf::RenderWindow window(sf::VideoMode(800, 600), "The Escapists - Prison Map");
+        window.setFramerateLimit(60);
+
+        GameManager game;
+        game.Initialize();
+
+        auto player = std::make_shared<Player>("Rafa");
+        player->InitGraphics(GameManager::ASSETS_PATH + "player.png", tile(2, 2).x, tile(2, 2).y, sf::Color::White);
+        auto guard1 = std::make_shared<Guard>("Officer Smith");
+        guard1->InitGraphics(GameManager::ASSETS_PATH + "player.png", tile(5, 8).x, tile(5, 8).y, sf::Color(100, 100, 255));
+        auto guard2 = std::make_shared<Guard>("Officer Brown");
+        guard2->InitGraphics(GameManager::ASSETS_PATH + "player.png", tile(20, 8).x, tile(20, 8).y, sf::Color(100, 100, 255));
+        auto guard3 = std::make_shared<Guard>("Officer Lee");
+        guard3->InitGraphics(GameManager::ASSETS_PATH + "player.png", tile(35, 8).x, tile(35, 8).y, sf::Color(80, 80, 220));
+        auto inmate1 = std::make_shared<Inmate>("Bob");
+        inmate1->InitGraphics(GameManager::ASSETS_PATH + "player.png", tile(8, 3).x, tile(8, 3).y, sf::Color(255, 160, 50));
+        auto inmate2 = std::make_shared<Inmate>("Joe");
+        inmate2->InitGraphics(GameManager::ASSETS_PATH + "player.png", tile(14, 3).x, tile(14, 3).y, sf::Color(255, 160, 50));
+        auto inmate3 = std::make_shared<Inmate>("Mike");
+        inmate3->InitGraphics(GameManager::ASSETS_PATH + "player.png", tile(20, 3).x, tile(20, 3).y, sf::Color(255, 130, 30));
+        auto inmate4 = std::make_shared<Inmate>("Alex");
+        inmate4->InitGraphics(GameManager::ASSETS_PATH + "player.png", tile(26, 3).x, tile(26, 3).y, sf::Color(255, 130, 30));
+        auto inmate5 = std::make_shared<Inmate>("Tony");
+        inmate5->InitGraphics(GameManager::ASSETS_PATH + "player.png", tile(32, 3).x, tile(32, 3).y, sf::Color(220, 110, 20));
+        game.AddEntity(player);
+        game.AddEntity(guard1);
+        game.AddEntity(guard2);
+        game.AddEntity(guard3);
+        game.AddEntity(inmate1);
+        game.AddEntity(inmate2);
+        game.AddEntity(inmate3);
+        game.AddEntity(inmate4);
+        game.AddEntity(inmate5);
+        game.Run(window);
     }
-    Player jucator("Rafa");
-    jucator.InitGraphics("assets/player.png", 50.f, 50.f, sf::Color::White);
-    sf::Clock clock;
-    while (window.isOpen())
+    catch (const GameException& e)
     {
-        float deltaTime = clock.restart().asSeconds();
-        sf::Event event{};
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
-                window.close();
-        }
-        jucator.Update(deltaTime, map);
-        sf::Vector2f playerPos = jucator.GetPosition();
-        sf::View camera(sf::FloatRect(0.f, 0.f, 320.f, 240.f));
-        float camHalfWidth = camera.getSize().x / 2.f;
-        float camHalfHeight = camera.getSize().y / 2.f;
-        float camX = std::max(camHalfWidth, std::min(playerPos.x, static_cast<float>(map.GetWidthInPixels()) - camHalfWidth));
-        float camY = std::max(camHalfHeight, std::min(playerPos.y, static_cast<float>(map.GetHeightInPixels()) - camHalfHeight));
-        camera.setCenter(camX, camY);
-        window.clear(sf::Color::Black);
-        window.setView(camera);
-        window.draw(map);
-        jucator.Draw(window);
-        window.display();
+        std::cerr << "Game Error: " << e.what() << "\n";
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Standard Exception: " << e.what() << "\n";
     }
     return 0;
 }
