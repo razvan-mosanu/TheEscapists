@@ -27,6 +27,8 @@ private:
     int draggedItemIndex; // -1 if not dragging
     sf::Vector2f infirmaryPos; // respawn point
 
+     // Full inventory screen
+    bool showFullInventory;
     // for events
     Routine previousRoutine;
     bool rollcallEventTriggered;
@@ -35,6 +37,8 @@ private:
     void DrawMenu(sf::RenderWindow& window);
     void DrawHUD(sf::RenderWindow& window, sf::View& camera, const std::shared_ptr<class Player>& player);
     void DrawInventoryBar(sf::RenderWindow& window, const std::shared_ptr<class Player>& player);
+    void DrawInventoryFull(sf::RenderWindow& window, const std::shared_ptr<class Player>& player);
+    void DrawStats(sf::RenderWindow& window, const std::shared_ptr<class Player>& player);
 
 public:
     GameManager();

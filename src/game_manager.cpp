@@ -13,7 +13,7 @@ const std::string GameManager::ASSETS_PATH = "assets/";
 GameManager::GameManager()
     : state(GameState::Menu), currentRoutine(Routine::MorningRollcall),
     dialogueTimer(0.f), inGameTime(8.0f), routinePenaltyTimer(0.f),
-    combatMode(false), draggedItemIndex(-1),
+    combatMode(false), draggedItemIndex(-1), showFullInventory(false),
     previousRoutine(Routine::LightsOut), rollcallEventTriggered(false) {}
 
 void GameManager::AddEntity(const std::shared_ptr<Entity> &entity)
@@ -178,7 +178,8 @@ void GameManager::DrawHUD(sf::RenderWindow &window, sf::View &camera, const std:
         dText.setPosition(105.f, 524.f);
         window.draw(dText);
     }
-    if (state == GameState::Inventory) DrawInventoryBar(window, player);
+    if (state == GameState::Inventory || showFullInventory) DrawInventoryFull(window, player);
+    else DrawInventoryBar(window, player);
     window.setView(camera);
 }
 
@@ -235,6 +236,65 @@ void GameManager::DrawInventoryBar(sf::RenderWindow &window, const std::shared_p
     }
 }
 
+void GameManager::DrawInventoryFull(sf::RenderWindow& window, const std::shared_ptr<class Player>& player)
+{
+    if (!player) return;
+    sf::RectangleShape bg(sf::Vector2f(400.f, 300.f));
+    bg.setFillColor(sf::Color(20, 20, 30, 240));
+    bg.setOutlineColor(sf::Color(100, 100, 150));
+    bg.setOutlineThickness(3.f);
+    bg.setPosition(window.getSize().x / 2.f - 200.f, window.getSize().y / 2.f - 150.f);
+    window.draw(bg);
+    sf::Text title("INVENTORY", font, 24);
+    title.setPosition(window.getSize().x / 2.f - 70.f, window.getSize().y / 2.f - 140.f);
+    window.draw(title);
+    float startX = window.getSize().x / 2.f - 170.f;
+    float startY = window.getSize().y / 2.f - 80.f;
+    auto items = player->GetInventory().GetItems();
+    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+    for (int i = 0; i < player->GetInventory().GetCapacity(); ++i)
+    {
+        int col = i % 3;
+        int row = i / 3;
+        float x = startX + static_cast<float>(col) * 120.f;
+        float y = startY + static_cast<float>(row) * 80.f;
+        sf::RectangleShape slot(sf::Vector2f(100.f, 60.f));
+        slot.setPosition(x, y);
+        slot.setFillColor(i == draggedItemIndex ? sf::Color(100, 100, 50, 200) : sf::Color(50, 50, 50, 200));
+        slot.setOutlineColor(sf::Color::White);
+        slot.setOutlineThickness(1.f);
+        window.draw(slot);
+        if (i < static_cast<int>(items.size()))
+        {
+            sf::Text itemText(items[i].GetName(), font, 14);
+            itemText.setFillColor(items[i].IsContraband() ? sf::Color(255, 100, 100) : sf::Color::White);
+            if (i == draggedItemIndex) itemText.setPosition(mousePos.x - 20.f, mousePos.y - 10.f);
+            else itemText.setPosition(x + 5.f, y + 20.f);
+            window.draw(itemText);
+        }
+    }
+}
+
+
+void GameManager::DrawStats(sf::RenderWindow& window, const std::shared_ptr<class Player>& player)
+{
+    window.setView(window.getDefaultView());
+    sf::RectangleShape bg(sf::Vector2f(800.f, 600.f));
+    bg.setFillColor(sf::Color(0, 0, 0, 200));
+    window.draw(bg);
+    sf::Text title("PLAYER STATS", font, 40);
+    title.setPosition(400.f - title.getGlobalBounds().width / 2.f, 100.f);
+    window.draw(title);
+    if (player)
+    {
+        sf::Text stats("Heat: " + std::to_string(player->GetHeat()) + "%\n"
+        "Health: " + std::to_string(player->GetHealth()) + "\n"
+        "Money: " + std::to_string(player->GetMoney()) + "$\n\nPress ESC to return.", font, 24);
+        stats.setPosition(250.f, 200.f);
+        window.draw(stats);
+    }
+}
+
 void GameManager::Run(sf::RenderWindow &window)
 {
     const float VIEW_W = 400.f;
@@ -268,6 +328,7 @@ void GameManager::Run(sf::RenderWindow &window)
                      event.key.code == sf::Keyboard::C))
                 {
                     state = GameState::Play;
+                    showFullInventory = false;
                 }
             }
             else if (state == GameState::Play)
@@ -285,7 +346,11 @@ void GameManager::Run(sf::RenderWindow &window)
                             throw CraftingException("Not enough materials to craft anything!");
                         state = GameState::Crafting;
                     }
-                    else if (event.key.code == sf::Keyboard::I) state = GameState::Inventory;
+                    else if (event.key.code == sf::Keyboard::I)
+                    {
+                        state = GameState::Inventory;
+                        showFullInventory = true;
+                    }
                     else if (event.key.code == sf::Keyboard::Space)
                     {
                         combatMode = !combatMode;
@@ -436,7 +501,16 @@ void GameManager::Run(sf::RenderWindow &window)
             window.display();
             continue;
         }
-        if (state == GameState::Stats || state == GameState::Crafting)
+        if (state == GameState::Stats)
+        {
+            std::shared_ptr<Player> playerPtr = nullptr;
+            for (auto &entity : entities)
+                if (auto p = std::dynamic_pointer_cast<Player>(entity)) playerPtr = p;
+            DrawStats(window, playerPtr);
+            window.display();
+            continue;
+        }
+        if (state == GameState::Crafting)
         {
             window.clear(sf::Color(20, 20, 30));
             window.display();
