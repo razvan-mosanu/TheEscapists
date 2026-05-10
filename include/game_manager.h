@@ -39,6 +39,8 @@ private:
     void DrawInventoryBar(sf::RenderWindow& window, const std::shared_ptr<class Player>& player);
     void DrawInventoryFull(sf::RenderWindow& window, const std::shared_ptr<class Player>& player);
     void DrawStats(sf::RenderWindow& window, const std::shared_ptr<class Player>& player);
+    void DrawCrafting(sf::RenderWindow& window);
+    void DrawZoneLabel(sf::RenderWindow& window, const std::shared_ptr<class Player>& player);
 
 public:
     GameManager();

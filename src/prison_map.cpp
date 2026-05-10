@@ -62,7 +62,24 @@ bool PrisonMap::Load(const std::string& mapFilepath, const std::string& tilesetF
     m_mapData = ParseTMJ(mapFilepath);
     if (!m_mapData.groundLayer.empty()) BuildVertexArray(m_groundVertices, m_mapData.groundLayer);
     if (!m_mapData.wallsLayer.empty())  BuildVertexArray(m_wallsVertices, m_mapData.wallsLayer);
-    //i need to make the zones and give the names when i make a better map
+    const auto TW = static_cast<float>(m_mapData.tileWidth);
+    const auto TH = static_cast<float>(m_mapData.tileHeight);
+    m_zones.clear();
+    m_zones.push_back({"Cells",    sf::FloatRect(1*TW,  1*TH, 35*TW, 7*TH)});
+    m_zones.push_back({"Cell1",   sf::FloatRect(1*TW,  1*TH,  5*TW, 6*TH)});
+    m_zones.push_back({"Cell2",   sf::FloatRect(7*TW,  1*TH,  5*TW, 6*TH)});
+    m_zones.push_back({"Cell3",   sf::FloatRect(13*TW, 1*TH,  5*TW, 6*TH)});
+    m_zones.push_back({"Cell4",   sf::FloatRect(19*TW, 1*TH,  5*TW, 6*TH)});
+    m_zones.push_back({"Cell5",   sf::FloatRect(25*TW, 1*TH,  5*TW, 6*TH)});
+    m_zones.push_back({"Cell6",   sf::FloatRect(31*TW, 1*TH,  5*TW, 6*TH)});
+    m_zones.push_back({"Corridor", sf::FloatRect(1*TW,  8*TH, 38*TW, 1*TH)});
+    m_zones.push_back({"Canteen",  sf::FloatRect(1*TW,  10*TH, 12*TW, 8*TH)});
+    m_zones.push_back({"Shower",   sf::FloatRect(14*TW, 10*TH, 12*TW, 8*TH)});
+    m_zones.push_back({"Library",  sf::FloatRect(27*TW, 10*TH, 12*TW, 8*TH)});
+    m_zones.push_back({"Gym",      sf::FloatRect(1*TW,  19*TH, 12*TW, 9*TH)});
+    m_zones.push_back({"Central",  sf::FloatRect(14*TW, 19*TH, 12*TW, 9*TH)});
+    m_zones.push_back({"Workshop", sf::FloatRect(27*TW, 19*TH, 12*TW, 9*TH)});
+    m_zones.push_back({"Infirmary",sf::FloatRect(14*TW, 19*TH, 12*TW, 9*TH)});
     return true;
 }
 

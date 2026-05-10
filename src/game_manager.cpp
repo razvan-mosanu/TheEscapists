@@ -33,6 +33,10 @@ bool GameManager::Initialize()
 
 void GameManager::DrawMenu(sf::RenderWindow &window)
 {
+    //fixed full screen problem
+    sf::View uiView(sf::FloatRect(0.f, 0.f, 800.f, 600.f));
+    window.setView(uiView);
+
     window.clear(sf::Color(30, 30, 30));
     sf::Text title("THE ESCAPISTS", font, 40);
     title.setFillColor(sf::Color::White);
@@ -47,7 +51,11 @@ void GameManager::DrawMenu(sf::RenderWindow &window)
 void GameManager::DrawHUD(sf::RenderWindow &window, sf::View &camera, const std::shared_ptr<Player>& player)
 {
     if (!player) return;
-    window.setView(window.getDefaultView());
+
+    //fixed full screen problem
+    sf::View uiView(sf::FloatRect(0.f, 0.f, 800.f, 600.f));
+    window.setView(uiView);
+
     sf::RectangleShape hudBg(sf::Vector2f(240.f, 150.f));
     hudBg.setFillColor(sf::Color(15, 15, 25, 120));
     hudBg.setOutlineColor(sf::Color(80, 80, 120));
@@ -59,6 +67,7 @@ void GameManager::DrawHUD(sf::RenderWindow &window, sf::View &camera, const std:
     nameText.setFillColor(sf::Color(220, 220, 255));
     nameText.setPosition(16.f, 14.f);
     window.draw(nameText);
+
     //Hp
     sf::Text hpLabel("HP", font, 11);
     hpLabel.setFillColor(sf::Color(255, 100, 100));
@@ -171,27 +180,43 @@ void GameManager::DrawHUD(sf::RenderWindow &window, sf::View &camera, const std:
         dialogBox.setFillColor(sf::Color(10, 10, 20, 220));
         dialogBox.setOutlineColor(sf::Color(120, 120, 200));
         dialogBox.setOutlineThickness(2.f);
-        dialogBox.setPosition(90.f, 510.f);
+        //fixed overlaping problem
+        dialogBox.setPosition(90.f, 450.f);
         window.draw(dialogBox);
         sf::Text dText(dialogueText, font, 16);
         dText.setFillColor(sf::Color(230, 230, 255));
-        dText.setPosition(105.f, 524.f);
+        dText.setPosition(105.f, 464.f);
         window.draw(dText);
     }
+    DrawZoneLabel(window, player);
     if (state == GameState::Inventory || showFullInventory) DrawInventoryFull(window, player);
     else DrawInventoryBar(window, player);
     window.setView(camera);
+}
+
+void GameManager::DrawZoneLabel(sf::RenderWindow& window, const std::shared_ptr<class Player>& player)
+{
+    if (!player) return;
+    std::string zoneName = map.GetZoneAt(player->GetPosition().x + 8.f, player->GetPosition().y + 12.f);
+    sf::Text zoneText("Zone: " + zoneName, font, 14);
+    zoneText.setFillColor(sf::Color(255, 255, 200));
+    //fixed full screen problem
+    zoneText.setPosition(800.f - 150.f, 10.f);
+    sf::RectangleShape bg(sf::Vector2f(140.f, 25.f));
+    bg.setFillColor(sf::Color(0, 0, 0, 150));
+    bg.setPosition(800.f - 155.f, 5.f);
+    window.draw(bg);
+    window.draw(zoneText);
 }
 
 void GameManager::DrawInventoryBar(sf::RenderWindow &window, const std::shared_ptr<Player>& player)
 {
     if (!player) return;
     bool isFullInventory = (state == GameState::Inventory);
-
-    float startX = isFullInventory ? static_cast<float>(window.getSize().x) / 2.f - 170.f : 220.f;
-    float startY = isFullInventory ? static_cast<float>(window.getSize().y) / 2.f - 80.f : static_cast<float>(window.getSize().y) - 70.f;
-
-    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+    //new positions
+    float startX = isFullInventory ? 230.f : 220.f;
+    float startY = isFullInventory ? 220.f : 530.f;
+    sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
     auto items = player->GetInventory().GetItems();
     int maxSlots = isFullInventory ? player->GetInventory().GetCapacity() : 6;
 
@@ -199,13 +224,9 @@ void GameManager::DrawInventoryBar(sf::RenderWindow &window, const std::shared_p
     {
         int col = i % 3;
         int row = i / 3;
-        float x = isFullInventory
-                      ? startX + static_cast<float>(col) * 120.f
-                      : startX + static_cast<float>(i) * 60.f;
+        float x = isFullInventory ? startX + static_cast<float>(col) * 120.f : startX + static_cast<float>(i) * 60.f;
+        float y = isFullInventory ? startY + static_cast<float>(row) * 80.f : startY;
 
-        float y = isFullInventory
-                      ? startY + static_cast<float>(row) * 80.f
-                      : startY;
         sf::RectangleShape slot(sf::Vector2f(50.f, 50.f));
         slot.setPosition(x, y);
 
@@ -228,7 +249,7 @@ void GameManager::DrawInventoryBar(sf::RenderWindow &window, const std::shared_p
             itemText.setFillColor(items[i].IsContraband() ? sf::Color::Red : sf::Color::White);
 
             if (i == draggedItemIndex)
-                itemText.setPosition(static_cast<float>(mousePos.x) - 20.f, static_cast<float>(mousePos.y) - 10.f);
+                itemText.setPosition(mousePos.x - 20.f, mousePos.y - 10.f);
             else
                 itemText.setPosition(x + 5.f, y + 25.f);
             window.draw(itemText);
@@ -243,42 +264,64 @@ void GameManager::DrawInventoryFull(sf::RenderWindow& window, const std::shared_
     bg.setFillColor(sf::Color(20, 20, 30, 240));
     bg.setOutlineColor(sf::Color(100, 100, 150));
     bg.setOutlineThickness(3.f);
-    bg.setPosition(window.getSize().x / 2.f - 200.f, window.getSize().y / 2.f - 150.f);
+    bg.setPosition(200.f, 150.f);
     window.draw(bg);
+
     sf::Text title("INVENTORY", font, 24);
-    title.setPosition(window.getSize().x / 2.f - 70.f, window.getSize().y / 2.f - 140.f);
+    title.setPosition(330.f, 160.f);
     window.draw(title);
-    float startX = window.getSize().x / 2.f - 170.f;
-    float startY = window.getSize().y / 2.f - 80.f;
+
+    float startX = 230.f;
+    float startY = 220.f;
     auto items = player->GetInventory().GetItems();
-    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+    sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+
     for (int i = 0; i < player->GetInventory().GetCapacity(); ++i)
     {
         int col = i % 3;
         int row = i / 3;
         float x = startX + static_cast<float>(col) * 120.f;
         float y = startY + static_cast<float>(row) * 80.f;
+
         sf::RectangleShape slot(sf::Vector2f(100.f, 60.f));
         slot.setPosition(x, y);
         slot.setFillColor(i == draggedItemIndex ? sf::Color(100, 100, 50, 200) : sf::Color(50, 50, 50, 200));
         slot.setOutlineColor(sf::Color::White);
         slot.setOutlineThickness(1.f);
         window.draw(slot);
+
         if (i < static_cast<int>(items.size()))
         {
             sf::Text itemText(items[i].GetName(), font, 14);
             itemText.setFillColor(items[i].IsContraband() ? sf::Color(255, 100, 100) : sf::Color::White);
-            if (i == draggedItemIndex) itemText.setPosition(mousePos.x - 20.f, mousePos.y - 10.f);
-            else itemText.setPosition(x + 5.f, y + 20.f);
+            if (i == draggedItemIndex)
+                itemText.setPosition(mousePos.x - 20.f, mousePos.y - 10.f);
+            else
+                itemText.setPosition(x + 5.f, y + 20.f);
             window.draw(itemText);
         }
     }
 }
 
+void GameManager::DrawCrafting(sf::RenderWindow& window)
+{
+    sf::View uiView(sf::FloatRect(0.f, 0.f, 800.f, 600.f));
+    window.setView(uiView);
+    sf::RectangleShape bg(sf::Vector2f(800.f, 600.f));
+    bg.setFillColor(sf::Color(0, 0, 0, 200));
+    window.draw(bg);
+    sf::Text title("CRAFTING MENU", font, 40);
+    title.setPosition(400.f - title.getGlobalBounds().width / 2.f, 100.f);
+    window.draw(title);
+    sf::Text help("Press ESC to return.", font, 24);
+    help.setPosition(200.f, 200.f);
+    window.draw(help);
+}
 
 void GameManager::DrawStats(sf::RenderWindow& window, const std::shared_ptr<class Player>& player)
 {
-    window.setView(window.getDefaultView());
+    sf::View uiView(sf::FloatRect(0.f, 0.f, 800.f, 600.f));
+    window.setView(uiView);
     sf::RectangleShape bg(sf::Vector2f(800.f, 600.f));
     bg.setFillColor(sf::Color(0, 0, 0, 200));
     window.draw(bg);
@@ -310,7 +353,6 @@ void GameManager::Run(sf::RenderWindow &window)
         while (window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed) window.close();
-
             if (state == GameState::Menu)
             {
                 if (event.type == sf::Event::KeyPressed)
@@ -375,7 +417,7 @@ void GameManager::Run(sf::RenderWindow &window)
                                     sf::Vector2f playerCenter = playerPtr->GetCenter();
                                     sf::Vector2f entityCenter = entity->GetCenter();
                                     auto dist =  static_cast<float>(std::sqrt(std::pow(entityCenter.x - playerCenter.x, 2) +
-                                                                    std::pow(entityCenter.y - playerCenter.y, 2)));
+                                                                             std::pow(entityCenter.y - playerCenter.y, 2)));
                                     if (dist < 20.f)
                                     {
                                         auto dmg = static_cast<short>(playerPtr->GetPower() / 2);
@@ -413,11 +455,12 @@ void GameManager::Run(sf::RenderWindow &window)
                 }
                 else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
                 {
-                    sf::Vector2i mousePosScreen = sf::Mouse::getPosition(window);
+                    sf::View uiView(sf::FloatRect(0.f, 0.f, 800.f, 600.f));
+                    sf::Vector2f mousePosScreen = window.mapPixelToCoords(sf::Mouse::getPosition(window), uiView);
 
                     bool isFullInventory = (state == GameState::Inventory);
-                    float startX = isFullInventory ? static_cast<float>(window.getSize().x) / 2.f - 170.f : 220.f;
-                    float startY = isFullInventory ? static_cast<float>(window.getSize().y) / 2.f - 80.f : static_cast<float>(window.getSize().y) - 70.f;
+                    float startX = isFullInventory ? 230.f : 220.f;
+                    float startY = isFullInventory ? 220.f : 530.f;
                     int maxSlots = isFullInventory && playerPtr ? playerPtr->GetInventory().GetCapacity() : 6;
 
                     for (int i = 0; i < maxSlots; ++i)
@@ -428,8 +471,9 @@ void GameManager::Run(sf::RenderWindow &window)
                         float y = isFullInventory ? startY + static_cast<float>(row) * 80.f : startY;
                         float w = isFullInventory ? 100.f : 50.f;
                         float h = isFullInventory ? 60.f : 50.f;
+
                         sf::FloatRect slotBounds(x, y, w, h);
-                        if (slotBounds.contains(static_cast<float>(mousePosScreen.x), static_cast<float>(mousePosScreen.y)))
+                        if (slotBounds.contains(mousePosScreen.x, mousePosScreen.y))
                         {
                             if (playerPtr && i < static_cast<int>(playerPtr->GetInventory().GetItems().size())) draggedItemIndex = i;
                             break;
@@ -440,10 +484,12 @@ void GameManager::Run(sf::RenderWindow &window)
                 {
                     if (draggedItemIndex != -1 && playerPtr)
                     {
-                        sf::Vector2i mousePosScreen = sf::Mouse::getPosition(window);
+                        sf::View uiView(sf::FloatRect(0.f, 0.f, 800.f, 600.f));
+                        sf::Vector2f mousePosScreen = window.mapPixelToCoords(sf::Mouse::getPosition(window), uiView);
+
                         bool isFullInventory = (state == GameState::Inventory);
-                        float startX = isFullInventory ? static_cast<float>(window.getSize().x) / 2.f - 170.f : 220.f;
-                        float startY = isFullInventory ? static_cast<float>(window.getSize().y) / 2.f - 80.f : static_cast<float>(window.getSize().y) - 70.f;
+                        float startX = isFullInventory ? 230.f : 220.f;
+                        float startY = isFullInventory ? 220.f : 530.f;
                         int maxSlots = isFullInventory ? playerPtr->GetInventory().GetCapacity() : 6;
 
                         for (int i = 0; i < maxSlots; ++i)
@@ -454,8 +500,9 @@ void GameManager::Run(sf::RenderWindow &window)
                             float y = isFullInventory ? startY + static_cast<float>(row) * 80.f : startY;
                             float w = isFullInventory ? 100.f : 50.f;
                             float h = isFullInventory ? 60.f : 50.f;
+
                             sf::FloatRect slotBounds(x, y, w, h);
-                            if (slotBounds.contains(static_cast<float>(mousePosScreen.x), static_cast<float>(mousePosScreen.y)))
+                            if (slotBounds.contains(mousePosScreen.x, mousePosScreen.y))
                             {
                                 if (i != draggedItemIndex && i < static_cast<int>(playerPtr->GetInventory().GetItems().size()))
                                 {
@@ -478,7 +525,10 @@ void GameManager::Run(sf::RenderWindow &window)
             DrawMenu(window);
             if (showControls)
             {
-                sf::RectangleShape overlay(sf::Vector2f(static_cast<float>(window.getSize().x), static_cast<float>(window.getSize().y)));
+                sf::View uiView(sf::FloatRect(0.f, 0.f, 800.f, 600.f));
+                window.setView(uiView);
+
+                sf::RectangleShape overlay(sf::Vector2f(800.f, 600.f));
                 overlay.setFillColor(sf::Color(10, 10, 15, 240));
                 window.draw(overlay);
                 sf::Text ctrlTitle("HOW TO PLAY", font, 32);
@@ -501,18 +551,17 @@ void GameManager::Run(sf::RenderWindow &window)
             window.display();
             continue;
         }
-        if (state == GameState::Stats)
+
+        if (state == GameState::Stats || state == GameState::Crafting)
         {
-            std::shared_ptr<Player> playerPtr = nullptr;
-            for (auto &entity : entities)
-                if (auto p = std::dynamic_pointer_cast<Player>(entity)) playerPtr = p;
-            DrawStats(window, playerPtr);
-            window.display();
-            continue;
-        }
-        if (state == GameState::Crafting)
-        {
-            window.clear(sf::Color(20, 20, 30));
+            if (state == GameState::Stats)
+            {
+                std::shared_ptr<Player> playerPtr = nullptr;
+                for (auto &entity : entities)
+                    if (auto p = std::dynamic_pointer_cast<Player>(entity)) playerPtr = p;
+                DrawStats(window, playerPtr);
+            }
+            else DrawCrafting(window);
             window.display();
             continue;
         }
