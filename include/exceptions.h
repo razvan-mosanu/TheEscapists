@@ -10,6 +10,9 @@ protected:
     std::string message;
 public:
     explicit GameException(std::string  msg);
+    /// daca se blocheaza programul s-ar putea sa ramanem fara RAM
+    /// si daca folosim string care ar vrea sa aloce memorie
+    /// s-ar produce o alta eroares
     [[nodiscard]] const char* what() const noexcept override;
 };
 

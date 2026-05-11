@@ -27,7 +27,7 @@ GameManager::GameManager(const GameManager& other)
     rollcallEventTriggered(other.rollcallEventTriggered), searchedCell(other.searchedCell)
 {
     for (const auto& entity : other.entities)
-        if (entity) this->entities.push_back(entity->Clone()); //se apeleaza Clone() pentru a face o copie
+        if (entity) this->entities.push_back(entity->Clone());
 }
 
 void swap(GameManager& first, GameManager& second) noexcept
@@ -129,7 +129,8 @@ void GameManager::DrawHUD(sf::RenderWindow &window, sf::View &camera, const std:
     window.draw(hpFill);
     sf::Text hpNum(std::to_string(curHp) + "/" + std::to_string(maxHp), font, 10);
     hpNum.setFillColor(sf::Color(255, 200, 200));
-    hpNum.setPosition(215.f, 37.f);
+    // ma enerva ca iesea un 0 afara din dreptunghi
+    hpNum.setPosition(210.f, 36.f);
     window.draw(hpNum);
 
     // Heat Bar
@@ -210,7 +211,7 @@ void GameManager::DrawHUD(sf::RenderWindow &window, sf::View &camera, const std:
     else
     {
         sf::Text controlsText("I:Inv  C:Craft  Spc:Fight", font, 10);
-        controlsText.setFillColor(sf::Color(130, 130, 130));
+        controlsText.setFillColor(sf::Color(0, 0, 0));
         controlsText.setPosition(16.f, 118.f);
         window.draw(controlsText);
     }
@@ -405,21 +406,28 @@ void GameManager::Run(sf::RenderWindow &window)
             }
             else if (state == GameState::Stats || state == GameState::Crafting || state == GameState::Inventory)
             {
-                if (event.type == sf::Event::KeyPressed &&
-                    (event.key.code == sf::Keyboard::Escape ||
-                     event.key.code == sf::Keyboard::I ||
-                     event.key.code == sf::Keyboard::C))
+                if (event.type == sf::Event::KeyPressed)
                 {
-                    state = GameState::Play;
-                    showFullInventory = false;
+                    if(event.key.code == sf::Keyboard::Escape || event.key.code == sf::Keyboard::I || event.key.code == sf::Keyboard::C)
+                    {
+                        state = GameState::Play;
+                        showFullInventory = false;
+                    }
+                    else if (event.key.code == sf::Keyboard::X) window.close();
                 }
+
             }
             else if (state == GameState::Play)
             {
                 std::shared_ptr<Player> playerPtr = nullptr;
                 for (auto &entity : entities)
-                    if (auto p = std::dynamic_pointer_cast<Player>(entity)) playerPtr = p;
-
+                    if (auto p = std::dynamic_pointer_cast<Player>(entity))
+                    {
+                        playerPtr = p;
+                        break; // oprim cautarea pentru eficienta
+                        // totusi cred ca o sa modific asta mai tarziu
+                        // si o sa fac doar o data aceasta cautare si o retin
+                    }
                 if (event.type == sf::Event::KeyPressed)
                 {
                     if (event.key.code == sf::Keyboard::Q) state = GameState::Stats;
@@ -457,9 +465,12 @@ void GameManager::Run(sf::RenderWindow &window)
                                     if (entity == playerPtr || entity->IsKnockedOut()) continue;
                                     sf::Vector2f playerCenter = playerPtr->GetCenter();
                                     sf::Vector2f entityCenter = entity->GetCenter();
-                                    auto dist =  static_cast<float>(std::sqrt(std::pow(entityCenter.x - playerCenter.x, 2) +
-                                                                             std::pow(entityCenter.y - playerCenter.y, 2)));
-                                    if (dist < 20.f)
+                                    // nu mai folosesc sqrt si pow pentru performanta
+                                    // calculez totul la patrat
+                                    float dx = entityCenter.x - playerCenter.x;
+                                    float dy = entityCenter.y - playerCenter.y;
+                                    float dist = (dx * dx) + (dy * dy);
+                                    if (dist < 400.f)
                                     {
                                         auto dmg = static_cast<short>(playerPtr->GetPower() / 2);
                                         entity->TakeDamage(dmg);
@@ -599,8 +610,13 @@ void GameManager::Run(sf::RenderWindow &window)
             {
                 std::shared_ptr<Player> playerPtr = nullptr;
                 for (auto &entity : entities)
-                    if (auto p = std::dynamic_pointer_cast<Player>(entity)) playerPtr = p;
+                    if (auto p = std::dynamic_pointer_cast<Player>(entity))
+                    {
+                        playerPtr = p;
+                        break;
+                    }
                 DrawStats(window, playerPtr);
+
             }
             else DrawCrafting(window);
             window.display();
@@ -620,10 +636,14 @@ void GameManager::Run(sf::RenderWindow &window)
 
             std::shared_ptr<Player> playerPtr = nullptr;
             for (auto &entity : entities)
-                if (auto p = std::dynamic_pointer_cast<Player>(entity))  playerPtr = p;
+                if (auto p = std::dynamic_pointer_cast<Player>(entity))
+                {
+                    playerPtr = p;
+                    break;
+                }
             for (auto &entity : entities)
             {
-                if (state == GameState::Play)entity->Update(deltaTime, map);
+                if (state == GameState::Play) entity->Update(deltaTime, map);
                 if (auto guard = std::dynamic_pointer_cast<Guard>(entity))
                 {
                     if (playerPtr && playerPtr->GetHeat() >= 80 && !guard->IsKnockedOut()) guard->SetAggro(playerPtr);

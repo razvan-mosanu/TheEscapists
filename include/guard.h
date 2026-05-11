@@ -15,7 +15,7 @@ class Guard : public Entity
 {
 private:
     Inventory confiscatedItems;
-    std::vector<sf::Vector2f> currentPath;
+    std::vector<sf::Vector2f> currentPath; // lista de coordonate catre target
     float patrolTimer;
     sf::FloatRect targetZone;
     bool hasTargetZone;
@@ -25,7 +25,7 @@ private:
 
 public:
     explicit Guard(std::string name);
-    ~Guard() override = default;
+    ~Guard() override = default; /// override sa verifice daca destructorul din clasa de baza are virtual
 
     void SetPath(const std::vector<sf::Vector2f>& path) { currentPath = path; }
     void SetTargetZone(const sf::FloatRect& zone) { targetZone = zone; hasTargetZone = true; hasExactTarget = false; patrolTimer = 0.f; }
@@ -34,7 +34,7 @@ public:
     void SetAggro(std::shared_ptr<Player> p)
     {
         ///bug fix
-        ///doar daca se schimba tinta sa faca clear
+        ///doar daca se schimba tinta se face clear
         if (aggroPlayer != p) currentPath.clear();
         aggroPlayer = p;
         combatTimer = 5.0f;

@@ -195,6 +195,8 @@ The [template repository](https://github.com/mcmarius/oop-template) itself is li
 
 ## Resurse
 
+https://github.com/nlohmann/json
+
 https://www.sfml-dev.org/documentation/3.1.0/
 
 https://en.wikipedia.org/wiki/A*_search_algorithm

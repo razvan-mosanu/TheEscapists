@@ -11,7 +11,7 @@ class PrisonMap;
 class Entity {
 protected:
     std::string name;
-    sf::Vector2f position;
+    sf::Vector2f position; //coordonate X si Y
     sf::Texture texture;
     sf::Sprite sprite;
     float moveSpeed;
@@ -26,19 +26,24 @@ protected:
     static int GetRandomInt(int min, int max);
 public:
     explicit Entity(std::string name);
-    virtual ~Entity();
+    virtual ~Entity(); //virtual pentru a nu avea memeory leak
 
     static int activeEntities;
     virtual void InitGraphics(const std::string& texturePath, float startX, float startY, sf::Color tint);
 
+    //functii virtuale pure deci rezulta clasa abstracta
+    //nu pot instantia obiecte de acest tip
+    //sunt obligat sa fac aceste functii pentru clasele derivate
     virtual void Update(float deltaTime, const PrisonMap& map) = 0;
     virtual void Draw(sf::RenderWindow& window) const = 0;
     virtual std::shared_ptr<Entity> Clone() const = 0;
 
     // Non-Virtual Interface
-    void Display(std::ostream& os) const { Print(os); }
+    // nu o poate modifica nimeni
+    void Display(std::ostream& os) const { Print(os);}
 
-    virtual void Interact(Entity* /*other*/) {}
+    // nu e virtuala pura pentru ca nu toata lumea interactioneaza
+    virtual void Interact(Entity* /*other*/) {} //doar cand il folosesc decomentez acolo unde il scriu
     const std::string& GetName() const { return name; }
     sf::Vector2f GetPosition() const { return position; }
     void SetPosition(sf::Vector2f pos) { position = pos; sprite.setPosition(pos); }
