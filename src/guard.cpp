@@ -26,7 +26,10 @@ void Guard::InspectPlayer(Player &p)
 void Guard::SearchCell(Cell &c)
 {
     std::cout << "[Guard] " << name << " is searching cell " << c.GetNumber() << ".\n";
-    c.SearchCell();
+    std::vector<Item> foundItems;
+    c.SearchCell(foundItems); // apelam metoda actualizata
+    for (const auto& item : foundItems)
+        confiscatedItems.AddItem(item); // adaugam obiectele in inventarul gardianului
 }
 
 void Guard::Update(float deltaTime, const PrisonMap &map)

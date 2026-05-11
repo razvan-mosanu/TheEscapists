@@ -21,7 +21,7 @@ public:
     short GetNumber() const {return cellNumber;}
     bool HideItemInCabinet(const Item &ob);
     bool BreakWall(Player& p, const std::string& tool);
-    int SearchCell();
+    int SearchCell(std::vector<Item>& outItems);
     friend std::ostream &operator<<(std::ostream &os, const Cell &c);
 };
 

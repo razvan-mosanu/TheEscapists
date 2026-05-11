@@ -33,7 +33,7 @@ public:
     std::vector<Item> GetItems() const;
     void SetItems(const std::vector<Item>& newItems);
     friend std::ostream &operator<<(std::ostream &os, const Inventory &inv);
-    int ConfiscateContraband();
+    std::vector<Item> ConfiscateContraband();
 };
 
 #endif // INVENTORY_H

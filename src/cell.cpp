@@ -41,7 +41,7 @@ bool Cell::BreakWall(Player &p, const std::string &tool)
     return false;
 }
 
-int Cell::SearchCell()
+int Cell::SearchCell(std::vector<Item>& outItems)
 {
     int suspicion = 0;
     std::cout << "Guard in Cell " << cellNumber << " is searching!\n";
@@ -51,7 +51,8 @@ int Cell::SearchCell()
         hasPosterOnDoor = false;
         suspicion += 10;
     }
-    int itemsConfiscated = cabinet.ConfiscateContraband();
+    outItems = cabinet.ConfiscateContraband(); // preluam obiectele
+    int itemsConfiscated = outItems.size();
     if (itemsConfiscated > 0)
     {
         std::cout << "Found " << itemsConfiscated << " contraband items in the cabinet!\n";
@@ -60,6 +61,7 @@ int Cell::SearchCell()
     else std::cout << "You are not clean but I cannot prove it.\n";
     return suspicion;
 }
+
 
 std::ostream &operator<<(std::ostream &os, const Cell &c)
 {

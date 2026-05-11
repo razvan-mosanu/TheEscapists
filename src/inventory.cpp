@@ -121,19 +121,17 @@ std::ostream &operator<<(std::ostream &os, const Inventory &inv)
     return os;
 }
 
-int Inventory::ConfiscateContraband()
+std::vector<Item> Inventory::ConfiscateContraband()
 {
-    int confiscatedItems = 0;
+    std::vector<Item> confiscated;
     for (short i = 0; i < currentItemCount; i++)
-    {
         if (items[i].IsContraband())
         {
-            confiscatedItems++;
+            confiscated.push_back(items[i]); // salvam obiectul
             for (short j = i; j < static_cast<short>(currentItemCount - 1); j++)
                 items[j] = items[j + 1];
             currentItemCount--;
             i--;
         }
-    }
-    return confiscatedItems;
+    return confiscated;
 }
