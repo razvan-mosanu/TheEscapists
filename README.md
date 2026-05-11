@@ -196,7 +196,11 @@ The [template repository](https://github.com/mcmarius/oop-template) itself is li
 ## Resurse
 
 https://www.sfml-dev.org/documentation/3.1.0/
+
 https://en.wikipedia.org/wiki/A*_search_algorithm
+
 https://www.geeksforgeeks.org/dsa/a-search-algorithm/
+
 https://www.spriters-resource.com/pc_computer/theescapists/
+
 https://www.mapeditor.org/
