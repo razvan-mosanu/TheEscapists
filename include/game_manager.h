@@ -45,6 +45,11 @@ private:
 public:
     GameManager();
     ~GameManager() = default;
+    GameManager(const GameManager& other);
+    //funcție friend pentru swap
+    friend void swap(GameManager& first, GameManager& second) noexcept;
+    GameManager& operator=(GameManager other);
+
     static const std::string ASSETS_PATH;
     void AddEntity(const std::shared_ptr<Entity>& entity);
     bool Initialize();

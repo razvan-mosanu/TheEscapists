@@ -51,8 +51,8 @@ void Guard::Update(float deltaTime, const PrisonMap &map)
         }
         else if (dist > 20.f)
         {
-            //repath some times
-            if (currentPath.empty() || GetRandomInt(0, 29) == 0)
+            //repath one time for one second
+            if (currentPath.empty() || GetRandomInt(0, 59) == 0)
                 currentPath = map.FindPath(this->GetCenter(), aggroPlayer->GetCenter());
         }
         else

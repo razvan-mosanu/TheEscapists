@@ -31,7 +31,14 @@ public:
     void SetTargetZone(const sf::FloatRect& zone) { targetZone = zone; hasTargetZone = true; hasExactTarget = false; patrolTimer = 0.f; }
     void SetExactTarget(const sf::Vector2f& target) { exactTarget = target; hasExactTarget = true; hasTargetZone = false; currentPath.clear(); }
     void ClearTargets() { hasTargetZone = false; hasExactTarget = false; }
-    void SetAggro(std::shared_ptr<Player> p) { aggroPlayer = p; currentPath.clear(); combatTimer = 5.0f; }
+    void SetAggro(std::shared_ptr<Player> p)
+    {
+        ///bug fix
+        ///doar daca se schimba tinta sa faca clear
+        if (aggroPlayer != p) currentPath.clear();
+        aggroPlayer = p;
+        combatTimer = 5.0f;
+    }
     void ClearAggro() override { aggroPlayer = nullptr; currentPath.clear(); }
     Inventory& GetInventory() { return confiscatedItems; }
 

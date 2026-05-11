@@ -21,10 +21,9 @@ Player::Player(std::string nameParam) : Entity(std::move(nameParam)),
 void Player::TakeDamage(short amount)
 {
     if (health <= 0) return;
-    health = static_cast<short>(health - amount);
-    combatTimer = 5.0f;
-    if (health <= 0) health = 0;
+    Entity::TakeDamage(amount); // folosim clasa de baza
 }
+
 
 void Player::Respawn()
 {

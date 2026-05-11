@@ -26,7 +26,7 @@ protected:
     static int GetRandomInt(int min, int max);
 public:
     explicit Entity(std::string name);
-    virtual ~Entity() = default;
+    virtual ~Entity();
 
     static int activeEntities;
     virtual void InitGraphics(const std::string& texturePath, float startX, float startY, sf::Color tint);

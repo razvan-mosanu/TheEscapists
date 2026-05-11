@@ -44,7 +44,7 @@ void Inmate::Update(float deltaTime, const PrisonMap& map)
         }
         else if (dist > 20.f)
         {
-            if (wanderPath.empty() || GetRandomInt(0, 29) == 0)
+            if (wanderPath.empty() || GetRandomInt(0, 59) == 0)
                 wanderPath = map.FindPath(this->GetCenter(), aggroPlayer->GetCenter());
         }
         else

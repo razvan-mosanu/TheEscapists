@@ -15,6 +15,13 @@ int Entity::GetRandomInt(int min, int max)
 
 int Entity::activeEntities = 0;
 
+//sa arate fix ce e activ nu tot ce s-a creat
+Entity::~Entity()
+{
+    activeEntities--;
+}
+
+
 Entity::Entity(std::string name):
     name(std::move(name)), moveSpeed(0.0f), health(100), maxHealth(100),
     regenAccumulator(0.f), power(10), combatTimer(0.f), knockoutTimer(0.f),

@@ -66,6 +66,12 @@ int main()
         game.AddEntity(inmate4);
         game.AddEntity(inmate5);
         game.Run(window);
+        /**
+        Test deep copy
+        GameManager gameCopy = game;
+        GameManager gameAssign;
+        gameAssign = game;
+        */
     }
     catch (const GameException& e)
     {

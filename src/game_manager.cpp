@@ -16,6 +16,47 @@ GameManager::GameManager()
     combatMode(false), draggedItemIndex(-1), showFullInventory(false),
     previousRoutine(Routine::LightsOut), rollcallEventTriggered(false) {}
 
+//Deep Copy
+GameManager::GameManager(const GameManager& other)
+    : map(other.map), font(other.font), state(other.state),
+    currentRoutine(other.currentRoutine), dialogueTimer(other.dialogueTimer),
+    inGameTime(other.inGameTime), routinePenaltyTimer(other.routinePenaltyTimer),
+    dialogueText(other.dialogueText), combatMode(other.combatMode),
+    draggedItemIndex(other.draggedItemIndex), infirmaryPos(other.infirmaryPos),
+    showFullInventory(other.showFullInventory), previousRoutine(other.previousRoutine),
+    rollcallEventTriggered(other.rollcallEventTriggered), searchedCell(other.searchedCell)
+{
+    for (const auto& entity : other.entities)
+        if (entity) this->entities.push_back(entity->Clone()); //se apeleaza Clone() pentru a face o copie
+}
+
+void swap(GameManager& first, GameManager& second) noexcept
+{
+    std::swap(first.entities, second.entities);
+    std::swap(first.map, second.map); //swap prin valoare
+    std::swap(first.font, second.font);
+    std::swap(first.state, second.state);
+    std::swap(first.currentRoutine, second.currentRoutine);
+    std::swap(first.dialogueTimer, second.dialogueTimer);
+    std::swap(first.inGameTime, second.inGameTime);
+    std::swap(first.routinePenaltyTimer, second.routinePenaltyTimer);
+    std::swap(first.dialogueText, second.dialogueText);
+    std::swap(first.combatMode, second.combatMode);
+    std::swap(first.draggedItemIndex, second.draggedItemIndex);
+    std::swap(first.infirmaryPos, second.infirmaryPos);
+    std::swap(first.showFullInventory, second.showFullInventory);
+    std::swap(first.previousRoutine, second.previousRoutine);
+    std::swap(first.rollcallEventTriggered, second.rollcallEventTriggered);
+    std::swap(first.searchedCell, second.searchedCell);
+}
+
+GameManager& GameManager::operator=(GameManager other)
+{
+    swap(*this, other);
+    return *this;
+}
+
+
 void GameManager::AddEntity(const std::shared_ptr<Entity> &entity)
 {
     entities.push_back(entity);
