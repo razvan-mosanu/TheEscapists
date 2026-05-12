@@ -19,34 +19,27 @@ include(cmake/Options.cmake)
 include(cmake/CompilerFlags.cmake)
 include(cmake/CopyHelper.cmake)
 
-###############################################################################
+# --- Extragere SFML si JSON ---
+include(FetchContent)
 
-# external dependencies with FetchContent
-# include(FetchContent)
-#
-# set(FETCHCONTENT_QUIET OFF CACHE INTERNAL "Override verbose output" FORCE)
-# set(FETCHCONTENT_UPDATES_DISCONNECTED ON CACHE INTERNAL "Override update strategy" FORCE)
-#
-# NOTE: Also update env vars used for caching in
-#     - .github/actions/configure-cmake/action.yml
-#     - .github/workflows/cmake.yml
-# FetchContent_Declare(
-#     SomeLib
-#     GIT_REPOSITORY https://github.com/<SomeUser>/<SomeLib>.git
-#     GIT_TAG        <some_git_hash> # <which tag/branch @ <some_date>>
-#     GIT_SHALLOW    1  # works only with branches or tags, not with arbitrary commit hashes
-#     GIT_PROGRESS   ON
-# )
-#
-# FetchContent_MakeAvailable(SomeLib)
+# 1. Adaugam nlohmann_json (pentru a parsa harta)
+FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.11.3
+    GIT_SHALLOW 1
+)
+FetchContent_MakeAvailable(nlohmann_json)
 
-###############################################################################
+# 2. Adaugam SFML (pentru fereastra, logica de desenare si texturi)
+FetchContent_Declare(
+    SFML
+    GIT_REPOSITORY https://github.com/SFML/SFML.git
+    GIT_TAG 2.6.x
+    GIT_SHALLOW 1
+)
+FetchContent_MakeAvailable(SFML)
 
-# external dependencies with find_package
-
-# find_package(Threads REQUIRED)
-
-###############################################################################
 
 # NOTE: update executable name in .github/workflows/cmake.yml:25 when changing name here
 add_executable(${MAIN_EXECUTABLE_NAME}
@@ -56,6 +49,11 @@ add_executable(${MAIN_EXECUTABLE_NAME}
     src/player.cpp
     src/cell.cpp
     src/guard.cpp
+    src/prison_map.cpp
+    src/entity.cpp
+    src/inmate.cpp
+    src/exceptions.cpp
+    src/game_manager.cpp
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )
@@ -74,6 +72,15 @@ target_include_directories(${MAIN_EXECUTABLE_NAME} PUBLIC
 target_include_directories(${MAIN_EXECUTABLE_NAME} SYSTEM PRIVATE
     ext
 )
+
+# Linkam executabilul nostru TheEscapists cu functiile SFML si nlohmann
+target_link_libraries(${MAIN_EXECUTABLE_NAME} PRIVATE
+    nlohmann_json::nlohmann_json
+    sfml-graphics
+    sfml-window
+    sfml-system
+)
+
 # target_include_directories(${MAIN_EXECUTABLE_NAME} SYSTEM PRIVATE ${<SomeLib>_SOURCE_DIR}/include)
 # target_link_directories(${MAIN_EXECUTABLE_NAME} PRIVATE ${<SomeLib>_BINARY_DIR}/lib)
 # target_link_libraries(${MAIN_EXECUTABLE_NAME} <SomeLib>)

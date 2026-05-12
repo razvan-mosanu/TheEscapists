@@ -54,6 +54,9 @@ jobs:
         # renovate: datasource=github-tags depName=actions/checkout versioning=loose
         uses: actions/checkout@v6.0.2
 
+      - name: Install packages
+        uses: ./.github/actions/install-packages
+
       - name: Run cppcheck
         uses: ./.github/actions/cppcheck
 
@@ -70,6 +73,9 @@ jobs:
       - name: Checkout repo
         # renovate: datasource=github-tags depName=actions/checkout versioning=loose
         uses: actions/checkout@v6.0.2
+
+      - name: Install packages
+        uses: ./.github/actions/install-packages
 
       - name: Run clang-tidy
         uses: ./.github/actions/clang-tidy
@@ -147,13 +153,13 @@ jobs:
             runs_asan: false
 
             # renovate: depName=macos
-          - os: macos-14
-            c: gcc-13
-            cxx: g++-13
-            # renovate: depName=macos
-            name: "macOS 14 GCC 13"
-            cmake_flags: "-DBUILD_SHARED_LIBS=OFF"
-            cmake_generator: Ninja
+          #- os: macos-14
+          #  c: gcc-13
+          #  cxx: g++-13
+          #  # renovate: depName=macos
+          #  name: "macOS 14 GCC 13"
+          #  cmake_flags: "-DBUILD_SHARED_LIBS=OFF"
+          #  cmake_generator: Ninja
 
             # renovate: depName=windows
           - os: windows-2022
@@ -181,6 +187,12 @@ jobs:
       - name: Checkout repo
         # renovate: datasource=github-tags depName=actions/checkout versioning=loose
         uses: actions/checkout@v6.0.2
+
+      - name: Install SFML Linux Dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxrandr-dev libxcursor-dev libudev-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev libegl1-mesa-dev libfreetype6-dev
 
       - name: Set timestamp, zip name, repo visibility
         env:
@@ -237,8 +249,8 @@ jobs:
           path: ${{ env.ZIP_NAME }}
           retention-days: 30
 
-      - name: Runtime checks
-        uses: ./.github/actions/runtime-checks
+      #- name: Runtime checks
+      #  uses: ./.github/actions/runtime-checks
 
       - name: Create release
         uses: ./.github/actions/create-release

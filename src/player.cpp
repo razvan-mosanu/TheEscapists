@@ -1,106 +1,169 @@
 #include "player.h"
 #include "item.h"
+#include "exceptions.h"
+#include <SFML/Window/Keyboard.hpp>
 #include <algorithm>
 #include <iostream>
 #include <ostream>
 #include <utility>
 
-Player::Player(std::string name_p) : name(std::move(name_p)), pocket(6)
+Player::Player(std::string nameParam) : Entity(std::move(nameParam)),
+    stamina(100), iq(50), speed(50), heat(0), money(50), inventory(6)
 {
-    life = 15;
-    stamina = 100;
-    iq = speed = power = 30;
-    heat = money = 0;
+    health    = 100;
+    maxHealth = 100;
+    power     = 30;
+    moveSpeed = 100.f;
+    inventory.AddItem(Item("Duct Tape", false, false, 0));
+    inventory.AddItem(Item("Shiv", true, true, 20));
 }
+
+void Player::TakeDamage(short amount)
+{
+    if (health <= 0) return;
+    Entity::TakeDamage(amount); // folosim clasa de baza
+}
+
 
 void Player::Respawn()
 {
-    life = 15;
-    stamina = 100;
-    heat = 0;
-    money /= 2;
-    iq = static_cast<short>(std::max(10, iq - 10));
-    speed = static_cast<short>(std::max(10, speed - 10));
-    power = static_cast<short>(std::max(10, power - 10));
-    pocket.Confiscate_Contraband();
+    health    = 15;
+    stamina   = 100;
+    heat      = 0;
+    money    /= 2;
+    iq        = static_cast<short>(std::max(10, (int)iq - 10));
+    speed     = static_cast<short>(std::max(10, (int)speed - 10));
+    power     = static_cast<short>(std::max(10, (int)power - 10));
+    combatTimer   = 0.f;
+    attackTimer   = 0.f;
+    isKnockedOut  = false;
+    inventory.ConfiscateContraband();
 }
 
-bool Player::PickUp_Item(const Item &object)
+bool Player::CollectItem(const Item& object)
 {
-    return pocket.Add_Item(object);
+    return inventory.AddItem(object);
 }
 
-short Player::Use_Item(const std::string &name_item, short uzura)
+short Player::UseItem(const std::string& itemName, short wear)
 {
-    return pocket.Use_Item(name_item, uzura);
+    return inventory.UseItem(itemName, wear);
 }
 
-Item Player::Extract_Item(const std::string &name_item)
+Item Player::ExtractItem(const std::string& itemName)
 {
-    return pocket.Extract_Item(name_item);
+    return inventory.ExtractItem(itemName);
 }
 
-bool Player::CraftItem(const std::string &item1, const std::string &item2, const std::string &rez, bool contraband, bool metal)
+bool Player::CraftItem(const std::string& item1, const std::string& item2, const std::string& result, bool isContraband, bool isMetal)
 {
-    auto poz1 = static_cast<short>(pocket.Search_Item(item1));
-    if (poz1 == -1) return false;
-    Item it1 = pocket.Get_Item(poz1);
-    pocket.Delete_Item(poz1);
-    auto poz2 = static_cast<short>(pocket.Search_Item(item2));
-    if (poz2 == -1)
+    auto pos1 = static_cast<short>(inventory.FindItem(item1));
+    if (pos1 == -1) return false;
+    Item it1 = inventory.GetItem(pos1);
+    inventory.RemoveItem(pos1);
+    auto pos2 = static_cast<short>(inventory.FindItem(item2));
+    if (pos2 == -1)
     {
-        pocket.Add_Item(it1);
+        inventory.AddItem(it1);
         return false;
     }
-    pocket.Delete_Item(poz2);
-    Item obj(rez, contraband, metal, 100);
-    pocket.Add_Item(obj);
-    std::cout << name << " successfully crafted: " << rez << "!\n";
+    inventory.RemoveItem(pos2);
+    Item obj(result, isContraband, isMetal, 100);
+    inventory.AddItem(obj);
+    std::cout << name << " successfully crafted: " << result << "!\n";
     return true;
 }
 
-void Player::ParticipateCall(bool prezenta)
+void Player::AttendRollcall(bool present)
 {
-    if (!prezenta)
+    if (!present)
     {
-        heat = static_cast<short>(std::min(100, heat + 90));
-        std::cout << name << " missed the roll call! Heat has massively increased to " << heat << "%.\n";
+        heat = static_cast<short>(std::min(100, (int)heat + 90));
+        std::cout << name << " missed rollcall! Heat increased massively to " << heat << "%.\n";
         return;
     }
-    heat = static_cast<short>(std::max(0, heat - 10));
-    std::cout << name << " participated in the roll call.\n";
+    heat = static_cast<short>(std::max(0, (int)heat - 10));
+    std::cout << name << " attended rollcall.\n";
 }
 
-void Player::Training(short durata, const std::string& categorie)
+void Player::Train(short duration, const std::string& category)
 {
-    auto cost_energie = static_cast<short>(durata * 5);
-    if (stamina < cost_energie) return;
-    stamina = static_cast<short>(stamina - cost_energie);
-    if(categorie == "speed") speed = static_cast<short>(std::min(100, speed + durata * 2));
-    else if(categorie == "iq") iq = static_cast<short>(std::min(100, iq + durata * 2));
-    else power = static_cast<short>(std::min(100, power + durata * 2));
+    auto energyCost = static_cast<short>(duration * 5);
+    if (stamina < energyCost) return;
+    stamina = static_cast<short>(stamina - energyCost);
+    if(category == "speed") speed = static_cast<short>(std::min(100, speed + duration * 2));
+    else if(category == "iq") iq = static_cast<short>(std::min(100, iq + duration * 2));
+    else power = static_cast<short>(std::min(100, power + duration * 2));
 }
 
-void Player::Get_Beaten(short damage)
+void Player::TakeBeating()
 {
-    life = static_cast<short>(std::max(0, life - damage));
-    heat = 100;
-    std::cout << name << " took a beating and lost " << damage << "HP! (life: " << life << "/15)\n";
-    if (life == 0)
+    Respawn();
+}
+
+void Player::Update(float deltaTime, const PrisonMap& map)
+{
+    BaseUpdate(deltaTime);
+    sf::Vector2f moveDir(0.f, 0.f);
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) moveDir.y -= 1.f;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) moveDir.y += 1.f;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) moveDir.x -= 1.f;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) moveDir.x += 1.f;
+    if (moveDir.x != 0.f || moveDir.y != 0.f)
     {
-        std::cout << name << " couldn't hold on anymore and ended up in the infirmary!\n";
-        Respawn();
+        float length = std::sqrt(moveDir.x * moveDir.x + moveDir.y * moveDir.y);
+        moveDir /= length;
     }
+    sf::Vector2f movement = moveDir * moveSpeed * deltaTime;
+    //hitbox
+    float left   = 3.f;
+    float right  = 13.f;
+    float top    = 10.f;
+    float bottom = 22.f;
+
+    // x-colision
+    if (movement.x != 0.f)
+    {
+        float nextX = position.x + movement.x;
+        if (!map.IsSolidWall(nextX + left,  position.y + top)    &&
+            !map.IsSolidWall(nextX + right, position.y + top)    &&
+            !map.IsSolidWall(nextX + left,  position.y + bottom) &&
+            !map.IsSolidWall(nextX + right, position.y + bottom))
+        {
+            position.x = nextX;
+        }
+    }
+    //y-colision
+    if (movement.y != 0.f)
+    {
+        float nextY = position.y + movement.y;
+        if (!map.IsSolidWall(position.x + left,  nextY + top)    &&
+            !map.IsSolidWall(position.x + right, nextY + top)    &&
+            !map.IsSolidWall(position.x + left,  nextY + bottom) &&
+            !map.IsSolidWall(position.x + right, nextY + bottom))
+        {
+            position.y = nextY;
+        }
+    }
+    sprite.setPosition(position);
 }
 
-std::ostream &operator<<(std::ostream &os, const Player &p)
+void Player::Draw(sf::RenderWindow& window) const
 {
-    os << "=== Player: " << p.name << " ===\n";
-    os << "HP: " << p.life << "/15 | Energy: " << p.stamina << "/100\n";
-    os << "STR: " << p.power << " | SPD: " << p.speed << " | IQ: " << p.iq
-       << "\n";
-    os << "Heat: " << p.heat << "% | Money: " << p.money << "$\n";
-    os << "--- pocket ---\n";
-    os << p.pocket;
-    return os;
+    window.draw(sprite);
+}
+
+std::shared_ptr<Entity> Player::Clone() const
+{
+    return std::make_shared<Player>(*this);
+}
+
+void Player::Print(std::ostream& os) const
+{
+    os << "=== Player: " << name << " ===\n";
+    os << "HP: " << health << "/" << maxHealth << " | Energy: " << stamina << "/100\n";
+    os << "STR: " << power << " | SPD: " << speed << " | IQ: " << iq << "\n";
+    os << "Heat: " << heat << "% | Money: " << money << "$\n";
+    os << "--- Inventory ---\n";
+    os << inventory;
 }

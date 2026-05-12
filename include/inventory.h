@@ -1,27 +1,39 @@
 #ifndef INVENTORY_H
 #define INVENTORY_H
+
 #include "item.h"
 #include <ostream>
+#include <string>
+#include <vector>
+#include <algorithm>
 
-class Inventory {
+class Inventory
+{
 private:
+    short capacity;
+    short currentItemCount;
     Item *items;
-    short capacity, curent_item;
+
 public:
     Inventory();
+    explicit Inventory(short maxCapacity);
     Inventory(const Inventory &other);
-    explicit Inventory(short max_capacity);
-    Inventory &operator=(const Inventory &other);
+    friend void swap(Inventory& first, Inventory& second) noexcept;
+    Inventory &operator=(Inventory other);
     ~Inventory();
-    bool Add_Item(const Item &object);
-    short Use_Item(const std::string& name, short wear);
-    Item Extract_Item(const std::string& name);
-    void Delete_Item(short poz);
-    void Swap(short poz1, short poz2);
-    int Search_Item(const std::string& name) const;
-    Item Get_Item(short poz) const;
+    bool AddItem(const Item &object);
+    short UseItem(const std::string& name, short wear);
+    Item ExtractItem(const std::string& name);
+    void RemoveItem(short pos);
+    void Swap(short pos1, short pos2);
+    int FindItem(const std::string& name) const;
+    Item GetItem(short pos) const;
+    short GetCount() const { return currentItemCount; }
+    short GetCapacity() const { return capacity; }
+    std::vector<Item> GetItems() const;
+    void SetItems(const std::vector<Item>& newItems);
     friend std::ostream &operator<<(std::ostream &os, const Inventory &inv);
-    int Confiscate_Contraband();
+    std::vector<Item> ConfiscateContraband();
 };
 
 #endif // INVENTORY_H

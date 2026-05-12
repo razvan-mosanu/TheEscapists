@@ -1,127 +1,137 @@
 #include "inventory.h"
 #include "item.h"
 #include <utility>
+#include "exceptions.h"
 
-Inventory::Inventory()
+Inventory::Inventory():
+    capacity(6),
+    currentItemCount(0),
+    items(new Item[6]) {}
+
+Inventory::Inventory(short maxCapacity):
+    capacity(maxCapacity), currentItemCount(0),
+    items(new Item[maxCapacity]) {}
+
+Inventory::Inventory(const Inventory &other):
+    capacity(other.capacity),
+    currentItemCount(other.currentItemCount),
+    items(new Item[other.capacity])
 {
-    capacity = 6;
-    curent_item = 0;
-    items = new Item[capacity];
+    for (short i = 0; i < currentItemCount; i++)
+        items[i] = other.items[i];
 }
 
-Inventory::Inventory(short max_capacity)
+void swap(Inventory& first, Inventory& second) noexcept
 {
-    capacity = max_capacity;
-    curent_item = 0;
-    items = new Item[capacity];
+    using std::swap;
+    swap(first.capacity, second.capacity);
+    swap(first.currentItemCount, second.currentItemCount);
+    swap(first.items, second.items);
 }
 
-Inventory::Inventory(const Inventory &other)
+Inventory& Inventory::operator=(Inventory other)
 {
-    this->capacity = other.capacity;
-    this->curent_item = other.curent_item;
-    this->items = new Item[this->capacity];
-    for (int i = 0; i < other.curent_item; i++)
-        this->items[i] = other.items[i];
-}
-
-Inventory &Inventory::operator=(const Inventory &other)
-{
-    if (this == &other) return *this;
-    delete[] this->items;
-    this->capacity = other.capacity;
-    this->curent_item = other.curent_item;
-    this->items = new Item[this->capacity];
-    for (int i = 0; i < other.curent_item; i++)
-        this->items[i] = other.items[i];
+    swap(*this, other);
     return *this;
 }
 
 Inventory::~Inventory()
 {
     delete[] items;
-    capacity = curent_item = 0;
+    capacity = currentItemCount = 0;
 }
 
-bool Inventory::Add_Item(const Item &obiect)
+bool Inventory::AddItem(const Item &object)
 {
-    if (curent_item == capacity) return false;
-    items[curent_item++] = obiect;
+    if (currentItemCount == capacity) return false;
+    items[currentItemCount++] = object;
     return true;
 }
 
-short Inventory::Use_Item(const std::string &name, short uzura)
+short Inventory::UseItem(const std::string &name, short wear)
 {
-    auto poz = static_cast<short>(Search_Item(name));
-    if (poz == -1) return 0;
-    short dur_inainte = items[poz].Get_Durability();
-    bool intact = items[poz].Degradation(uzura);
-    short dur_dupa = items[poz].Get_Durability();
-    if (!intact) Delete_Item(poz);
-    return (static_cast<short>(dur_inainte - dur_dupa));
+    auto pos = static_cast<short>(FindItem(name));
+    if (pos == -1) throw InvalidActionException("Item not found in inventory: " + name);
+    short durBefore = items[pos].GetDurability();
+    bool intact = items[pos].Degrade(wear);
+    short durAfter = items[pos].GetDurability();
+    if (!intact) RemoveItem(pos);
+    return static_cast<short>(durBefore - durAfter);
 }
 
-Item Inventory::Extract_Item(const std::string &name)
+Item Inventory::ExtractItem(const std::string &name)
 {
-    auto poz = static_cast<short>(Search_Item(name));
-    if (poz == -1) return {};
-    Item gasit = items[poz];
-    Delete_Item(poz);
-    return gasit;
+    auto pos = static_cast<short>(FindItem(name));
+    if (pos == -1) return {};
+    Item found = items[pos];
+    RemoveItem(pos);
+    return found;
 }
 
-
-void Inventory::Delete_Item(short poz)
+void Inventory::RemoveItem(short pos)
 {
-    if(poz < 0 || poz >= curent_item) return;
-    for(short i = poz; i < static_cast<short>(curent_item - 1); i++)
+    if(pos < 0 || pos >= currentItemCount) return;
+    for(short i = pos; i < static_cast<short>(currentItemCount - 1); i++)
         items[i] = items[i + 1];
-    curent_item--;
+    currentItemCount--;
 }
 
-void Inventory::Swap(short poz1, short poz2)
+void Inventory::Swap(short pos1, short pos2)
 {
-    if (poz1 < 0 || poz2 < 0 || poz1 >= curent_item || poz2 >= curent_item) return;
-    std::swap(items[poz1], items[poz2]);
+    if (pos1 < 0 || pos2 < 0 || pos1 >= currentItemCount || pos2 >= currentItemCount) return;
+    std::swap(items[pos1], items[pos2]);
 }
 
-int Inventory::Search_Item(const std::string &name) const
+int Inventory::FindItem(const std::string &name) const
 {
-    for (short i = 0; i < curent_item; i++)
-        if (items[i].Get_Name() == name) return i;
+    for (short i = 0; i < currentItemCount; i++)
+        if (items[i].GetName() == name) return i;
     return -1;
 }
 
-Item Inventory::Get_Item(short poz) const
+Item Inventory::GetItem(short pos) const
 {
-    if (poz >= 0 && poz < curent_item) return items[poz];
+    if (pos >= 0 && pos < currentItemCount) return items[pos];
     return {};
+}
+
+std::vector<Item> Inventory::GetItems() const
+{
+    return {items, items + currentItemCount};
+}
+
+void Inventory::SetItems(const std::vector<Item>& newItems)
+{
+    currentItemCount = 0;
+    for (const auto& item : newItems)
+        if (currentItemCount < capacity)
+            items[currentItemCount++] = item;
 }
 
 std::ostream &operator<<(std::ostream &os, const Inventory &inv)
 {
-    if (inv.curent_item == 0)
+    if (inv.currentItemCount == 0)
     {
-        os << "curent_item is empty!\n";
+        os << "Inventory is empty!\n";
         return os;
     }
-    os << "curent_item (" << inv.curent_item << "/" << inv.capacity << " slots occupied):\n";
-    for (short i = 0; i < inv.curent_item; i++)
+    os << "Inventory (" << inv.currentItemCount << "/" << inv.capacity << " slots occupied):\n";
+    for (short i = 0; i < inv.currentItemCount; i++)
         os << "  Slot " << i + 1 << ": " << inv.items[i];
     return os;
 }
 
-int Inventory::Confiscate_Contraband()
+std::vector<Item> Inventory::ConfiscateContraband()
 {
-    int confiscated_items = 0;
-    for (short i = 0; i < curent_item; i++)
-        if (items[i].Is_Contraband())
+    std::vector<Item> confiscated;
+    for (short i = 0; i < currentItemCount; i++)
+        if (items[i].IsContraband())
         {
-            confiscated_items++;
-            for (short j = i; j < static_cast<short>(curent_item - 1); j++)
+            confiscated.push_back(items[i]); // salvam obiectul
+            for (short j = i; j < static_cast<short>(currentItemCount - 1); j++)
                 items[j] = items[j + 1];
-            curent_item--;
+            currentItemCount--;
             i--;
         }
-    return confiscated_items;
+    return confiscated;
 }
