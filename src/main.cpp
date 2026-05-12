@@ -5,6 +5,7 @@
 #include "guard.h"
 #include "inmate.h"
 #include "exceptions.h"
+#include "warden.h"
 
 
 /**
@@ -56,6 +57,9 @@ int main()
         inmate4->InitGraphics(GameManager::ASSETS_PATH + "player.png", tile(26, 3).x, tile(26, 3).y, sf::Color(255, 130, 30));
         auto inmate5 = std::make_shared<Inmate>("Tony");
         inmate5->InitGraphics(GameManager::ASSETS_PATH + "player.png", tile(32, 3).x, tile(32, 3).y, sf::Color(220, 110, 20));
+        auto warden = std::make_shared<Warden>("Directorul");
+        warden->InitGraphics(GameManager::ASSETS_PATH + "player.png", 20.f * 16.f, 20.f * 16.f, sf::Color(200, 50, 50));
+        game.AddEntity(warden);
         game.AddEntity(player);
         game.AddEntity(guard1);
         game.AddEntity(guard2);
