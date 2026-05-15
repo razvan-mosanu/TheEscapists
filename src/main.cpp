@@ -7,23 +7,6 @@
 #include "exceptions.h"
 #include "warden.h"
 
-
-/**
- * mostenire(bifat)
- * funcții virtuale (pure) apelate prin pointeri de bază
- * din clasa care conține atributul de tip pointer de bază(bifat)
- * constructori virtuali (clone) (bifat)
- * interfata non-virtuala (bifat)
- * apelare constructori (bifat)
- * clasa cu pointer la baza cu derivate (bifat)
- *
- * Dynamic_cast / downcast: (bifat)
- * smart pointers (bifat)
- * functii si atribute statice (bifat)
- * stl (bifat)
- * const (bifat)
- */
-
 static sf::Vector2f tile(float col, float row)
 {
     return {col * 16.f + 8.f, row * 16.f + 8.f};

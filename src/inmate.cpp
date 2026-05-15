@@ -1,5 +1,6 @@
 #include "inmate.h"
 #include "player.h"
+#include "item_factory.h"
 #include <iostream>
 #include <utility>
 #include <cmath>
@@ -14,6 +15,27 @@ Inmate::Inmate(std::string nameParam)
     health    = 100;
     maxHealth = 100;
     power     = 40;
+    GenerateDailyItems();
+}
+
+void Inmate::GenerateDailyItems()
+{
+    // Goleste inventarul
+    std::vector<Item> emptyList;
+    inventory.SetItems(emptyList);
+
+    // Genereaza 1-2 iteme random
+    int numItems = GetRandomInt(1, 2);
+    for (int i = 0; i < numItems; ++i) {
+        int chance = GetRandomInt(1, 100);
+        if (chance < 30) {
+            inventory.AddItem(ItemFactory::CreateWeapon());
+        } else if (chance < 60) {
+            inventory.AddItem(ItemFactory::CreateTool());
+        } else {
+            inventory.AddItem(Item("Duct Tape", false, false, 0));
+        }
+    }
 }
 
 void Inmate::Interact(Entity* other)

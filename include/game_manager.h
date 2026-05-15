@@ -4,15 +4,16 @@
 #include "entity.h"
 #include "prison_map.h"
 #include "item.h"
+#include "observer.h"
 #include <vector>
 #include <memory>
 #include <string>
 #include <SFML/Graphics.hpp>
 
-enum class GameState { Menu, Play, Stats, Crafting, Inventory };
+enum class GameState { Menu, Play, Stats, Crafting, Inventory, Win, Trade };
 enum class Routine { MorningRollcall, Breakfast, FreeTime, Work, EveningRollcall, LightsOut };
 
-class GameManager {
+class GameManager : public Observer {
 private:
     std::vector<std::shared_ptr<Entity>> entities;
     PrisonMap map;
@@ -33,11 +34,13 @@ private:
     Routine previousRoutine;
     bool rollcallEventTriggered;
     std::string searchedCell;
+    std::shared_ptr<class Inmate> tradingInmate;
 
     void DrawMenu(sf::RenderWindow& window);
     void DrawHUD(sf::RenderWindow& window, sf::View& camera, const std::shared_ptr<class Player>& player);
     void DrawInventoryBar(sf::RenderWindow& window, const std::shared_ptr<class Player>& player);
     void DrawInventoryFull(sf::RenderWindow& window, const std::shared_ptr<class Player>& player);
+    void DrawTrade(sf::RenderWindow& window, const std::shared_ptr<class Player>& player);
     void DrawStats(sf::RenderWindow& window, const std::shared_ptr<class Player>& player);
     void DrawCrafting(sf::RenderWindow& window);
     void DrawZoneLabel(sf::RenderWindow& window, const std::shared_ptr<class Player>& player);
@@ -57,6 +60,7 @@ public:
     void AddEntity(const std::shared_ptr<Entity>& entity);
     bool Initialize();
     void Run(sf::RenderWindow& window);
+    void OnNotify(Entity* entity, Event event) override;
 };
 
 #endif // GAME_MANAGER_H

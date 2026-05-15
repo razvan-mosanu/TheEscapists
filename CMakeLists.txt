@@ -55,6 +55,7 @@ add_executable(${MAIN_EXECUTABLE_NAME}
     src/exceptions.cpp
     src/game_manager.cpp
     src/warden.cpp
+    src/item_factory.cpp
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

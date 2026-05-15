@@ -8,17 +8,16 @@ Warden::Warden(std::string nameParam) : Entity(std::move(nameParam))
     power = 100;
 }
 
-void Warden::Update(float deltaTime, const PrisonMap &/*map*/)
+void Warden::TakeDamage(short amount)
+{
+    Entity::TakeDamage(amount);
+    if (health <= 0) Notify(this, Event::WardenDefeated);
+}
+
+void Warden::Update(float deltaTime, const PrisonMap & /*map*/)
 {
     BaseUpdate(deltaTime);
-    if (isKnockedOut)
-    return;
-    // Momentan!
-    // Directorul închisorii doar stă și supervizează centrul închisorii.
-    // Pe viitor:
-    // Vreau sa fac atunci cand bati gardieni sa existe o sansa sa iti pice o
-    // cheie si wardenul sa stea intr-o incapere diferita si cu acea cheie sa
-    // intri la el daca reusesti sa il bati e ca si cum ai evada din inchisoare
+    if (isKnockedOut) return;
 }
 
 void Warden::Draw(sf::RenderWindow &window) const

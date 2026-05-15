@@ -41,7 +41,7 @@ public:
     }
     void ClearAggro() override { aggroPlayer = nullptr; currentPath.clear(); }
     Inventory& GetInventory() { return confiscatedItems; }
-
+    bool RollForWardenKeyDrop() const {return GetRandomInt(1, 100) < 10;}
     void InspectPlayer(Player& p);
     void SearchCell(Cell& c);
 

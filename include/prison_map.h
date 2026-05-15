@@ -22,6 +22,9 @@ private:
     int m_tileHeight = 0;
     std::vector<int> m_groundLayer;
     std::vector<int> m_wallsLayer;
+    std::vector<int> m_usiLayer;
+    std::vector<int> m_patLayer;
+    std::vector<int> m_afaraLayer;
 
 public:
     MapData() = default;
@@ -31,6 +34,9 @@ public:
     int GetTileHeight() const { return m_tileHeight; }
     const std::vector<int>& GetGroundLayer() const { return m_groundLayer; }
     const std::vector<int>& GetWallsLayer() const { return m_wallsLayer; }
+    const std::vector<int>& GetUsiLayer() const { return m_usiLayer; }
+    const std::vector<int>& GetPatLayer() const { return m_patLayer; }
+    const std::vector<int>& GetAfaraLayer() const { return m_afaraLayer; }
 
     void SetWidth(int w) { m_width = w; }
     void SetHeight(int h) { m_height = h; }
@@ -38,6 +44,9 @@ public:
     void SetTileHeight(int th) { m_tileHeight = th; }
     void SetGroundLayer(const std::vector<int>& layer) { m_groundLayer = layer; }
     void SetWallsLayer(const std::vector<int>& layer) { m_wallsLayer = layer; }
+    void SetUsiLayer(const std::vector<int>& layer) { m_usiLayer = layer; }
+    void SetPatLayer(const std::vector<int>& layer) { m_patLayer = layer; }
+    void SetAfaraLayer(const std::vector<int>& layer) { m_afaraLayer = layer; }
 };
 
 class MapZone // zonele inchisorii
@@ -55,22 +64,43 @@ public:
 class PrisonMap : public sf::Drawable, public sf::Transformable
 {
 private:
-    sf::VertexArray m_groundVertices;
-    sf::VertexArray m_wallsVertices;
-    sf::Texture m_tileset;
+public:
+    struct TilesetInfo
+    {
+        int firstGid;
+        std::shared_ptr<sf::Texture> texture;
+        int tileWidth;
+        int tileHeight;
+        int columns;
+        int imageWidth;
+        int imageHeight;
+    };
+
+    struct LayerRenderData
+    {
+        std::vector<std::pair<std::shared_ptr<sf::Texture>, sf::VertexArray>> arrays;
+    };
+
+private:
+    LayerRenderData m_groundRender;
+    LayerRenderData m_wallsRender;
+    LayerRenderData m_usiRender;
+    LayerRenderData m_patRender;
+    LayerRenderData m_afaraRender;
+    std::vector<TilesetInfo> m_tilesets;
     MapData m_mapData;
     std::vector<MapZone> m_zones;
-
     static MapData ParseTMJ(const std::string& filepath); /// .tmj e formatul pe care il exportez cand fac harta in tiled
-    void BuildVertexArray(sf::VertexArray& vertices, const std::vector<int>& layerData);
+    void BuildVertexArray(LayerRenderData& renderData, const std::vector<int>& layerData);
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 public:
     PrisonMap() {}
     ~PrisonMap() = default;
 
-    bool Load(const std::string& mapFilepath, const std::string& tilesetFilepath);
+    bool Load(const std::string& mapFilepath);
     bool IsSolidWall(float x, float y) const;
+    bool IsWardenDoor(float x, float y) const;
 
     int GetWidthInPixels() const { return m_mapData.GetWidth() * m_mapData.GetTileWidth(); }
     int GetHeightInPixels() const { return m_mapData.GetHeight() * m_mapData.GetTileHeight(); }

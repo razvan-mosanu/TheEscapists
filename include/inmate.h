@@ -40,6 +40,7 @@ public:
     int GetBreakfastState() const { return breakfastState; }
     short GetRespect() const { return respect; }
     void Interact(Entity* other) override;
+    void GenerateDailyItems();
 
     void Update(float deltaTime, const PrisonMap& map) override;
     void Draw(sf::RenderWindow& window) const override;

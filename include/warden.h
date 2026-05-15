@@ -14,6 +14,7 @@ public:
     void Update(float deltaTime, const PrisonMap& map) override;
     void Draw(sf::RenderWindow& window) const override;
     std::shared_ptr<Entity> Clone() const override;
+    void TakeDamage(short amount) override;
 };
 
 #endif // WARDEN_H

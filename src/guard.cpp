@@ -12,6 +12,8 @@ Guard::Guard(std::string nameParam)
     power = 50;
 }
 
+
+
 void Guard::InspectPlayer(Player &p)
 {
     std::cout << "[Guard] " << name << " stopped the player for a routine inspection.\n";
