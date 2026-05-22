@@ -25,7 +25,6 @@ public:
     short UseItem(const std::string& name, short wear);
     Item ExtractItem(const std::string& name);
     void RemoveItem(short pos);
-    void Swap(short pos1, short pos2);
     int FindItem(const std::string& name) const;
     Item GetItem(short pos) const;
     short GetCount() const { return currentItemCount; }

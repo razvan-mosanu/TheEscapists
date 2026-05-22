@@ -12,5 +12,3 @@ ResourceLoadException::ResourceLoadException(const std::string &resourceName)
 InvalidActionException::InvalidActionException(const std::string &actionDetail)
     : GameException("Invalid action: " + actionDetail) {}
 
-CraftingException::CraftingException(const std::string &item)
-    : GameException("Crafting failed for item: " + item) {}

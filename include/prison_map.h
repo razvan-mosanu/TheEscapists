@@ -10,8 +10,6 @@
 #include <cmath>
 #include <algorithm>
 
-// era sa pic examenul si sa uit sa transform
-// din prima varianta cu struct in clase
 
 class MapData
 {
@@ -25,6 +23,8 @@ private:
     std::vector<int> m_usiLayer;
     std::vector<int> m_patLayer;
     std::vector<int> m_afaraLayer;
+    std::vector<int> m_muncaLayer;
+    std::vector<int> m_dulapLayer;
 
 public:
     MapData() = default;
@@ -47,6 +47,10 @@ public:
     void SetUsiLayer(const std::vector<int>& layer) { m_usiLayer = layer; }
     void SetPatLayer(const std::vector<int>& layer) { m_patLayer = layer; }
     void SetAfaraLayer(const std::vector<int>& layer) { m_afaraLayer = layer; }
+    void SetMuncaLayer(const std::vector<int>& layer) { m_muncaLayer = layer; }
+    const std::vector<int>& GetMuncaLayer() const { return m_muncaLayer; }
+    void SetDulapLayer(const std::vector<int>& layer) { m_dulapLayer = layer; }
+    const std::vector<int>& GetDulapLayer() const { return m_dulapLayer; }
 };
 
 class MapZone // zonele inchisorii
@@ -63,7 +67,6 @@ public:
 
 class PrisonMap : public sf::Drawable, public sf::Transformable
 {
-private:
 public:
     struct TilesetInfo
     {
@@ -82,15 +85,18 @@ public:
     };
 
 private:
+    std::unordered_map<int, int> m_wallDurability;
     LayerRenderData m_groundRender;
     LayerRenderData m_wallsRender;
     LayerRenderData m_usiRender;
     LayerRenderData m_patRender;
     LayerRenderData m_afaraRender;
+    LayerRenderData m_muncaRender;
+    LayerRenderData m_dulapRender;
     std::vector<TilesetInfo> m_tilesets;
     MapData m_mapData;
     std::vector<MapZone> m_zones;
-    static MapData ParseTMJ(const std::string& filepath); /// .tmj e formatul pe care il exportez cand fac harta in tiled
+    static MapData ParseTMJ(const std::string& filepath);
     void BuildVertexArray(LayerRenderData& renderData, const std::vector<int>& layerData);
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
@@ -101,6 +107,9 @@ public:
     bool Load(const std::string& mapFilepath);
     bool IsSolidWall(float x, float y) const;
     bool IsWardenDoor(float x, float y) const;
+    bool IsDulap(float x, float y) const;
+    int HitWall(float x, float y, int damage);
+    bool IsOutside(float x, float y) const;
 
     int GetWidthInPixels() const { return m_mapData.GetWidth() * m_mapData.GetTileWidth(); }
     int GetHeightInPixels() const { return m_mapData.GetHeight() * m_mapData.GetTileHeight(); }
@@ -112,5 +121,6 @@ public:
 
     std::vector<sf::Vector2f> FindPath(sf::Vector2f startPos, sf::Vector2f targetPos) const;
 };
+
 
 #endif // PRISON_MAP_H

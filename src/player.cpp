@@ -1,6 +1,7 @@
 #include "player.h"
 #include "exceptions.h"
 #include "item.h"
+#include "item_factory.h"
 #include <SFML/Window/Keyboard.hpp>
 #include <algorithm>
 #include <iostream>
@@ -14,10 +15,12 @@ Player::Player(std::string nameParam)
 {
     health = 100;
     maxHealth = 100;
-    power = 30;
+    power = 100; // temporar pentru testare
     moveSpeed = 100.f;
     inventory.AddItem(Item("Duct Tape", false, false, 0));
     inventory.AddItem(Item("Shiv", true, true, 20));
+    inventory.AddItem(Item("Pickaxe", true, true, 100));
+    inventory.AddItem(ItemFactory::GetInstance().CreateWardenKey()); // Adaugat temporar pentru testare
 }
 
 void Player::TakeDamage(short amount)
@@ -56,21 +59,36 @@ Item Player::ExtractItem(const std::string &itemName)
     return inventory.ExtractItem(itemName);
 }
 
-bool Player::CraftItem(const std::string &item1, const std::string &item2,
+bool Player::CraftItem(const std::vector<std::string> &ingredients,
                        const std::string &result, bool isContraband,
                        bool isMetal)
 {
-    auto pos1 = static_cast<short>(inventory.FindItem(item1));
-    if (pos1 == -1) return false;
-    Item it1 = inventory.GetItem(pos1);
-    inventory.RemoveItem(pos1);
-    auto pos2 = static_cast<short>(inventory.FindItem(item2));
-    if (pos2 == -1)
+    std::vector<short> positionsToRemove;
+    std::vector<Item> currentItems = inventory.GetItems();
+    std::vector<bool> used(currentItems.size(), false);
+
+    for (const auto& ing : ingredients)
     {
-        inventory.AddItem(it1);
-        return false;
+        bool found = false;
+        for (size_t i = 0; i < currentItems.size(); ++i)
+        {
+            if (!used[i] && currentItems[i].GetName() == ing)
+            {
+                found = true;
+                used[i] = true;
+                positionsToRemove.push_back(static_cast<short>(i));
+                break;
+            }
+        }
+        if (!found) return false;
     }
-    inventory.RemoveItem(pos2);
+
+    std::sort(positionsToRemove.rbegin(), positionsToRemove.rend());
+    for (short pos : positionsToRemove)
+    {
+        inventory.RemoveItem(pos);
+    }
+
     Item obj(result, isContraband, isMetal, 100);
     inventory.AddItem(obj);
     std::cout << name << " successfully crafted: " << result << "!\n";
@@ -110,6 +128,19 @@ void Player::TakeBeating()
 void Player::Update(float deltaTime, const PrisonMap &map)
 {
     BaseUpdate(deltaTime);
+
+    // Regenerate stamina
+    if (stamina < 100)
+    {
+        staminaAccumulator += deltaTime * 5.0f; // 5 stamina per second
+        if (staminaAccumulator >= 1.0f)
+        {
+            auto stRegen = static_cast<short>(staminaAccumulator);
+            stamina = std::min((short)100, (short)(stamina + stRegen));
+            staminaAccumulator -= static_cast<float>(stRegen);
+        }
+    }
+    else staminaAccumulator = 0.f;
     sf::Vector2f moveDir(0.f, 0.f);
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
         moveDir.y -= 1.f;
@@ -123,6 +154,7 @@ void Player::Update(float deltaTime, const PrisonMap &map)
     {
         float length = std::sqrt(moveDir.x * moveDir.x + moveDir.y * moveDir.y);
         moveDir /= length;
+        facingDir = moveDir;
     }
     sf::Vector2f movement = moveDir * moveSpeed * deltaTime;
     // hitbox

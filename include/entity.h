@@ -25,13 +25,15 @@ protected:
     float knockoutTimer;
     float attackTimer;
     bool isKnockedOut;
-    static int GetRandomInt(int min, int max);
+
+protected:
+    static int activeEntities;
 
 public:
+    static int GetActiveEntities() { return activeEntities; }
     explicit Entity(std::string name);
     virtual ~Entity(); // virtual pentru a nu avea memeory leak
 
-    static int activeEntities;
     virtual void InitGraphics(const std::string &texturePath, float startX, float startY, sf::Color tint);
 
     // functii virtuale pure deci rezulta clasa abstracta

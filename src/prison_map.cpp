@@ -23,6 +23,8 @@ MapData PrisonMap::ParseTMJ(const std::string& filepath)
         else if (layer["name"] == "usi") map.SetUsiLayer(layer["data"].get<std::vector<int>>());
         else if (layer["name"] == "pat") map.SetPatLayer(layer["data"].get<std::vector<int>>());
         else if (layer["name"] == "afara") map.SetAfaraLayer(layer["data"].get<std::vector<int>>());
+        else if (layer["name"] == "munca") map.SetMuncaLayer(layer["data"].get<std::vector<int>>());
+        else if (layer["name"] == "dulap") map.SetDulapLayer(layer["data"].get<std::vector<int>>());
     }
     return map;
 }
@@ -53,7 +55,6 @@ void PrisonMap::BuildVertexArray(LayerRenderData& renderData, const std::vector<
                     break;
                 }
             if (tsIndex == -1) continue;
-
             const auto& ts = m_tilesets[tsIndex];
             unsigned int localID = tileID - ts.firstGid;
             int tv = localID % ts.columns;
@@ -142,23 +143,31 @@ bool PrisonMap::Load(const std::string& mapFilepath)
     if (!m_mapData.GetAfaraLayer().empty())
         BuildVertexArray(m_afaraRender, m_mapData.GetAfaraLayer());
 
+    if (!m_mapData.GetMuncaLayer().empty())
+        BuildVertexArray(m_muncaRender, m_mapData.GetMuncaLayer());
+
+    if (!m_mapData.GetDulapLayer().empty())
+        BuildVertexArray(m_dulapRender, m_mapData.GetDulapLayer());
+
     const auto TW = static_cast<float>(m_mapData.GetTileWidth());
     const auto TH = static_cast<float>(m_mapData.GetTileHeight());
 
     m_zones.clear();
     // emplace_back este mai rapid si construieste obiectul direct in memorie
-    m_zones.emplace_back("Cells",    sf::FloatRect(1*TW,  1*TH, 41*TW, 7*TH));
-    m_zones.emplace_back("Cell1",    sf::FloatRect(1*TW,  1*TH,  5*TW, 6*TH));
-    m_zones.emplace_back("Cell2",    sf::FloatRect(7*TW,  1*TH,  5*TW, 6*TH));
-    m_zones.emplace_back("Cell3",    sf::FloatRect(13*TW, 1*TH,  5*TW, 6*TH));
-    m_zones.emplace_back("Cell4",    sf::FloatRect(19*TW, 1*TH,  5*TW, 6*TH));
-    m_zones.emplace_back("Cell5",    sf::FloatRect(25*TW, 1*TH,  5*TW, 6*TH));
-    m_zones.emplace_back("Cell6",    sf::FloatRect(31*TW, 1*TH,  5*TW, 6*TH));
-    m_zones.emplace_back("Cell7",    sf::FloatRect(37*TW, 1*TH,  5*TW, 6*TH));
-    m_zones.emplace_back("Corridor", sf::FloatRect(1*TW,  8*TH, 41*TW, 2*TH));
-    m_zones.emplace_back("Canteen",  sf::FloatRect(1*TW,  11*TH, 17*TW, 10*TH));
-    m_zones.emplace_back("Shower",   sf::FloatRect(19*TW, 11*TH, 11*TW, 10*TH));
-    m_zones.emplace_back("Gym",      sf::FloatRect(31*TW, 11*TH, 11*TW, 10*TH));
+    m_zones.emplace_back("Cells",    sf::FloatRect(1*TW,  1*TH, 38*TW, 6*TH));
+    m_zones.emplace_back("Cell1",    sf::FloatRect(1*TW,  1*TH,  6*TW, 6*TH));
+    m_zones.emplace_back("Cell2",    sf::FloatRect(7*TW,  1*TH,  6*TW, 6*TH));
+    m_zones.emplace_back("Cell3",    sf::FloatRect(13*TW, 1*TH,  6*TW, 6*TH));
+    m_zones.emplace_back("Cell4",    sf::FloatRect(19*TW, 1*TH,  6*TW, 6*TH));
+    m_zones.emplace_back("Cell5",    sf::FloatRect(25*TW, 1*TH,  6*TW, 6*TH));
+    m_zones.emplace_back("Cell6",    sf::FloatRect(31*TW, 1*TH,  8*TW, 6*TH));
+    m_zones.emplace_back("Corridor", sf::FloatRect(1*TW,  7*TH, 38*TW, 3*TH));
+    m_zones.emplace_back("Canteen",  sf::FloatRect(1*TW,  10*TH, 13*TW, 9*TH));
+    m_zones.emplace_back("Infirmary",sf::FloatRect(14*TW, 10*TH, 13*TW, 9*TH));
+    m_zones.emplace_back("Gym",      sf::FloatRect(27*TW, 10*TH, 12*TW, 9*TH));
+    m_zones.emplace_back("Work",     sf::FloatRect(1*TW,  19*TH, 13*TW, 10*TH));
+    m_zones.emplace_back("WardenOffice", sf::FloatRect(14*TW, 19*TH, 13*TW, 10*TH));
+    m_zones.emplace_back("Shower",   sf::FloatRect(27*TW, 19*TH, 12*TW, 10*TH));
     return true;
 }
 
@@ -175,6 +184,8 @@ void PrisonMap::draw(sf::RenderTarget& target, sf::RenderStates states) const
         }
     };
     drawLayer(m_groundRender);
+    drawLayer(m_muncaRender);
+    drawLayer(m_dulapRender);
     drawLayer(m_wallsRender);
     drawLayer(m_afaraRender);
     drawLayer(m_patRender);
@@ -190,7 +201,9 @@ bool PrisonMap::IsSolidWall(float x, float y) const
     int idx = tileX + tileY * m_mapData.GetWidth();
     int wallId = m_mapData.GetWallsLayer()[idx] & 0x1FFFFFFF;
     int bedId = m_mapData.GetPatLayer()[idx] & 0x1FFFFFFF;
-    return (wallId != 0 || bedId != 0);
+    int muncaId = m_mapData.GetMuncaLayer()[idx] & 0x1FFFFFFF;
+    int dulapId = m_mapData.GetDulapLayer()[idx] & 0x1FFFFFFF;
+    return (wallId != 0 || bedId != 0 || muncaId != 0 || dulapId != 0);
 }
 
 bool PrisonMap::IsWardenDoor(float x, float y) const
@@ -203,11 +216,67 @@ bool PrisonMap::IsWardenDoor(float x, float y) const
     return (doorId == 442);
 }
 
+bool PrisonMap::IsDulap(float x, float y) const
+{
+    int tileX = static_cast<int>(x) / m_mapData.GetTileWidth();
+    int tileY = static_cast<int>(y) / m_mapData.GetTileHeight();
+    if (tileX < 0 || tileX >= m_mapData.GetWidth() || tileY < 0 || tileY >= m_mapData.GetHeight()) return false;
+    int idx = tileX + tileY * m_mapData.GetWidth();
+    if (m_mapData.GetDulapLayer().empty()) return false;
+    int dulapId = m_mapData.GetDulapLayer()[idx] & 0x1FFFFFFF;
+    return (dulapId != 0);
+}
+
 std::string PrisonMap::GetZoneAt(float x, float y) const
 {
     for (const auto& zone : m_zones)
         if (zone.GetBounds().contains(x, y)) return zone.GetName();
     return "Outside";
+}
+
+int PrisonMap::HitWall(float x, float y, int damage)
+{
+    int tileX = static_cast<int>(x) / m_mapData.GetTileWidth();
+    int tileY = static_cast<int>(y) / m_mapData.GetTileHeight();
+
+    if (tileX < 0 || tileX >= m_mapData.GetWidth() || tileY < 0 || tileY >= m_mapData.GetHeight())
+        return -1;
+
+    int idx = tileX + tileY * m_mapData.GetWidth();
+    std::vector<int> walls = m_mapData.GetWallsLayer();
+    
+    if (walls[idx] != 0)
+    {
+        if (m_wallDurability.find(idx) == m_wallDurability.end())
+        {
+            m_wallDurability[idx] = 100;
+        }
+
+        m_wallDurability[idx] -= damage;
+        int remainingHP = m_wallDurability[idx];
+        if (remainingHP <= 0)
+        {
+            walls[idx] = 0;
+            m_mapData.SetWallsLayer(walls);
+            BuildVertexArray(m_wallsRender, walls);
+            remainingHP = 0;
+        }
+        return remainingHP;
+    }
+
+    return -1;
+}
+
+
+bool PrisonMap::IsOutside(float x, float y) const
+{
+    int tileX = static_cast<int>(x) / m_mapData.GetTileWidth();
+    int tileY = static_cast<int>(y) / m_mapData.GetTileHeight();
+    if (tileX < 0 || tileX >= m_mapData.GetWidth() || tileY < 0 || tileY >= m_mapData.GetHeight()) return true;
+
+    int idx = tileX + tileY * m_mapData.GetWidth();
+    int afaraId = m_mapData.GetAfaraLayer()[idx] & 0x1FFFFFFF;
+    return (afaraId != 0);
 }
 
 // A* for pathfinding
@@ -222,12 +291,30 @@ private:
 public:
     AStarNode(int xp, int yp) : x(xp), y(yp), f(0), g(0), h(0), parent(nullptr) {}
 
-    [[nodiscard]] int GetX() const { return x; }
-    [[nodiscard]] int GetY() const { return y; }
-    [[nodiscard]] float GetF() const { return f; }
-    [[nodiscard]] float GetG() const { return g; }
-    [[nodiscard]] float GetH() const { return h; }
-    [[nodiscard]] std::shared_ptr<AStarNode> GetParent() const {return parent; }
+    [[nodiscard]] int GetX() const
+    {
+        return x;
+    }
+    [[nodiscard]] int GetY() const
+    {
+        return y;
+    }
+    [[nodiscard]] float GetF() const
+    {
+        return f;
+    }
+    [[nodiscard]] float GetG() const
+    {
+        return g;
+    }
+    [[nodiscard]] float GetH() const
+    {
+        return h;
+    }
+    [[nodiscard]] std::shared_ptr<AStarNode> GetParent() const
+    {
+        return parent;
+    }
     void SetG(float gCost)
     {
         g = gCost;
@@ -279,7 +366,9 @@ std::vector<sf::Vector2f> PrisonMap::FindPath(sf::Vector2f startPos, sf::Vector2
             int ny = targetY + dy[i];
             if (nx >= 0 && nx < width && ny >= 0 && ny < height)
             {
-                if (m_mapData.GetWallsLayer()[nx + ny * width] == 0)
+                float cx = static_cast<float>(nx * tileW) + static_cast<float>(tileW) / 2.f;
+                float cy = static_cast<float>(ny * tileH) + static_cast<float>(tileH) / 2.f;
+                if (!IsSolidWall(cx, cy))
                 {
                     targetX = nx;
                     targetY = ny;
@@ -330,7 +419,9 @@ std::vector<sf::Vector2f> PrisonMap::FindPath(sf::Vector2f startPos, sf::Vector2
             int nx = current->GetX() + dx[i];
             int ny = current->GetY() + dy[i];
             if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue; // if not in grid
-            if (m_mapData.GetWallsLayer()[nx + ny * width] != 0) continue;
+            float cx = static_cast<float>(nx * tileW) + static_cast<float>(tileW) / 2.f;
+            float cy = static_cast<float>(ny * tileH) + static_cast<float>(tileH) / 2.f;
+            if (IsSolidWall(cx, cy)) continue;
 
             int nIndex = ny * width + nx;
             float gCost = current->GetG() + 1.f;

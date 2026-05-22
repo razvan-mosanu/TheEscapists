@@ -16,9 +16,11 @@ class Player : public Entity
 {
 private:
     short stamina, iq, speed, heat, money;
+    float staminaAccumulator = 0.f;
     Inventory inventory;
-
+    sf::Vector2f facingDir = sf::Vector2f(0.f, 1.f); // Default facing down
 public:
+    sf::Vector2f GetFacingDir() const { return facingDir; }
     explicit Player(std::string name);
     ~Player() override = default;
     Inventory &GetInventory() { return inventory; }
@@ -36,8 +38,10 @@ public:
     short UseItem(const std::string &itemName, short wear);
     Item ExtractItem(const std::string &itemName);
     void Train(short duration, const std::string &category);
+    bool CraftItem(const std::vector<std::string> &ingredients,
+                   const std::string &result, bool isContraband,
+                   bool isMetal);
     void TakeBeating();
-    bool CraftItem(const std::string &item1, const std::string &item2, const std::string &result, bool isContraband, bool isMetal);
     void AttendRollcall(bool present);
 
     void Update(float deltaTime, const PrisonMap &map) override;

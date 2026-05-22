@@ -3,13 +3,22 @@
 
 #include "item.h"
 
-// Design Pattern 2: Factory Pattern
-class ItemFactory
+#include "utils.h"
+
+// Design Pattern 2: Factory Pattern + Tema 3: Singleton Instance 1
+class ItemFactory : public Singleton<ItemFactory>
 {
+    friend class Singleton<ItemFactory>;
+private:
+    ItemFactory() = default;
 public:
-    static Item CreateWardenKey();
-    static Item CreateWeapon();
-    static Item CreateTool();
+    Item CreateWardenKey();
+    Item CreateWeapon();
+    Item CreateTool();
+    Item CreateIronIngot();
+    Item CreateStick();
+    Item CreateRope();
+    Item CreateDuctTape();
 };
 
 #endif // ITEM_FACTORY_H

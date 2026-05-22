@@ -47,7 +47,6 @@ add_executable(${MAIN_EXECUTABLE_NAME}
     src/inventory.cpp
     src/item.cpp
     src/player.cpp
-    src/cell.cpp
     src/guard.cpp
     src/prison_map.cpp
     src/entity.cpp

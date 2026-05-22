@@ -28,10 +28,4 @@ public:
     explicit InvalidActionException(const std::string& actionDetail);
 };
 
-class CraftingException : public GameException
-{
-public:
-    explicit CraftingException(const std::string& item);
-};
-
 #endif // EXCEPTIONS_H
