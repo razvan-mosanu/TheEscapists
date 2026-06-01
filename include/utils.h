@@ -38,10 +38,7 @@ class RandomGenerator : public Singleton<RandomGenerator>
     friend class Singleton<RandomGenerator>;
 private:
     std::mt19937 gen;
-    RandomGenerator() { 
-        std::random_device rd; 
-        gen = std::mt19937(rd()); 
-    }
+    RandomGenerator() : gen(std::random_device{}()) { }
 public:
     int GetInt(int min, int max) {
         std::uniform_int_distribution<> distrib(min, max);
