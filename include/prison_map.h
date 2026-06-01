@@ -10,7 +10,6 @@
 #include <cmath>
 #include <algorithm>
 
-
 class MapData
 {
 private:
@@ -20,11 +19,11 @@ private:
     int m_tileHeight = 0;
     std::vector<int> m_groundLayer;
     std::vector<int> m_wallsLayer;
-    std::vector<int> m_usiLayer;
-    std::vector<int> m_patLayer;
-    std::vector<int> m_afaraLayer;
-    std::vector<int> m_muncaLayer;
-    std::vector<int> m_dulapLayer;
+    std::vector<int> m_doorLayer;
+    std::vector<int> m_bedLayer;
+    std::vector<int> m_outsideLayer;
+    std::vector<int> m_workLayer;
+    std::vector<int> m_stashLayer;
 
 public:
     MapData() = default;
@@ -34,9 +33,9 @@ public:
     int GetTileHeight() const { return m_tileHeight; }
     const std::vector<int>& GetGroundLayer() const { return m_groundLayer; }
     const std::vector<int>& GetWallsLayer() const { return m_wallsLayer; }
-    const std::vector<int>& GetUsiLayer() const { return m_usiLayer; }
-    const std::vector<int>& GetPatLayer() const { return m_patLayer; }
-    const std::vector<int>& GetAfaraLayer() const { return m_afaraLayer; }
+    const std::vector<int>& GetDoorLayer() const { return m_doorLayer; }
+    const std::vector<int>& GetBedLayer() const { return m_bedLayer; }
+    const std::vector<int>& GetOutsideLayer() const { return m_outsideLayer; }
 
     void SetWidth(int w) { m_width = w; }
     void SetHeight(int h) { m_height = h; }
@@ -44,16 +43,16 @@ public:
     void SetTileHeight(int th) { m_tileHeight = th; }
     void SetGroundLayer(const std::vector<int>& layer) { m_groundLayer = layer; }
     void SetWallsLayer(const std::vector<int>& layer) { m_wallsLayer = layer; }
-    void SetUsiLayer(const std::vector<int>& layer) { m_usiLayer = layer; }
-    void SetPatLayer(const std::vector<int>& layer) { m_patLayer = layer; }
-    void SetAfaraLayer(const std::vector<int>& layer) { m_afaraLayer = layer; }
-    void SetMuncaLayer(const std::vector<int>& layer) { m_muncaLayer = layer; }
-    const std::vector<int>& GetMuncaLayer() const { return m_muncaLayer; }
-    void SetDulapLayer(const std::vector<int>& layer) { m_dulapLayer = layer; }
-    const std::vector<int>& GetDulapLayer() const { return m_dulapLayer; }
+    void SetDoorLayer(const std::vector<int>& layer) { m_doorLayer = layer; }
+    void SetBedLayer(const std::vector<int>& layer) { m_bedLayer = layer; }
+    void SetOutsideLayer(const std::vector<int>& layer) { m_outsideLayer = layer; }
+    void SetWorkLayer(const std::vector<int>& layer) { m_workLayer = layer; }
+    const std::vector<int>& GetWorkLayer() const { return m_workLayer; }
+    void SetStashLayer(const std::vector<int>& layer) { m_stashLayer = layer; }
+    const std::vector<int>& GetStashLayer() const { return m_stashLayer; }
 };
 
-class MapZone // zonele inchisorii
+class MapZone // prison zones
 {
 private:
     std::string m_name;
@@ -88,11 +87,11 @@ private:
     std::unordered_map<int, int> m_wallDurability;
     LayerRenderData m_groundRender;
     LayerRenderData m_wallsRender;
-    LayerRenderData m_usiRender;
-    LayerRenderData m_patRender;
-    LayerRenderData m_afaraRender;
-    LayerRenderData m_muncaRender;
-    LayerRenderData m_dulapRender;
+    LayerRenderData m_doorRender;
+    LayerRenderData m_bedRender;
+    LayerRenderData m_outsideRender;
+    LayerRenderData m_workRender;
+    LayerRenderData m_stashRender;
     std::vector<TilesetInfo> m_tilesets;
     MapData m_mapData;
     std::vector<MapZone> m_zones;
@@ -107,7 +106,7 @@ public:
     bool Load(const std::string& mapFilepath);
     bool IsSolidWall(float x, float y) const;
     bool IsWardenDoor(float x, float y) const;
-    bool IsDulap(float x, float y) const;
+    bool IsStash(float x, float y) const;
     int HitWall(float x, float y, int damage);
     bool IsOutside(float x, float y) const;
 

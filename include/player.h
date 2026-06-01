@@ -28,8 +28,8 @@ public:
     short GetMoney() const { return money; }
     void SpendMoney(short amount) { money = std::max((short)0, (short)(money - amount)); }
     short GetHeat() const { return heat; }
-    // clamp un fel de interval care nu te lasa sa iesi din el
-    // toate datele trebuie sa fie de acelasi tip
+    // clamp bounds to a range
+    // all data must be the same type
     void SetHeat(short value) { heat = std::clamp(value, (short)0, (short)100); }
     void SetHealth(short h) { health = h; }
     void TakeDamage(short amount) override;

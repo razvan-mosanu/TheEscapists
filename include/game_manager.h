@@ -53,8 +53,8 @@ private:
 public:
     GameManager();
     ~GameManager() = default;
-    // de ce copy and swap aici?
-    // daca implementez un sistem de save
+    // why copy and swap here?
+    // if I implement a save system
     // pot face deep copy rapid si salva progresul
     GameManager(const GameManager& other);
     //funcție friend pentru swap

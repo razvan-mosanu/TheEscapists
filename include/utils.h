@@ -32,7 +32,6 @@ std::shared_ptr<T> FindEntityByType(const Container &entities)
     return nullptr;
 }
 
-
 // Template class: Singleton Instance 2
 class RandomGenerator : public Singleton<RandomGenerator>
 {

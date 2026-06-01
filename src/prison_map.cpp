@@ -20,11 +20,11 @@ MapData PrisonMap::ParseTMJ(const std::string& filepath)
     {
         if (layer["name"] == "Ground") map.SetGroundLayer(layer["data"].get<std::vector<int>>());
         else if (layer["name"] == "Walls" || layer["name"] == "walls") map.SetWallsLayer(layer["data"].get<std::vector<int>>());
-        else if (layer["name"] == "usi") map.SetUsiLayer(layer["data"].get<std::vector<int>>());
-        else if (layer["name"] == "pat") map.SetPatLayer(layer["data"].get<std::vector<int>>());
-        else if (layer["name"] == "afara") map.SetAfaraLayer(layer["data"].get<std::vector<int>>());
-        else if (layer["name"] == "munca") map.SetMuncaLayer(layer["data"].get<std::vector<int>>());
-        else if (layer["name"] == "dulap") map.SetDulapLayer(layer["data"].get<std::vector<int>>());
+        else if (layer["name"] == "usi") map.SetDoorLayer(layer["data"].get<std::vector<int>>());
+        else if (layer["name"] == "pat") map.SetBedLayer(layer["data"].get<std::vector<int>>());
+        else if (layer["name"] == "afara") map.SetOutsideLayer(layer["data"].get<std::vector<int>>());
+        else if (layer["name"] == "munca") map.SetWorkLayer(layer["data"].get<std::vector<int>>());
+        else if (layer["name"] == "dulap") map.SetStashLayer(layer["data"].get<std::vector<int>>());
     }
     return map;
 }
@@ -48,7 +48,7 @@ void PrisonMap::BuildVertexArray(LayerRenderData& renderData, const std::vector<
             bool flipD = (rawTileNumber & 0x20000000) != 0;
             unsigned int tileID = rawTileNumber & 0x1FFFFFFF;
             int tsIndex = -1;
-            for (int k = m_tilesets.size() - 1; k >= 0; --k)
+            for (int k = static_cast<int>(m_tilesets.size()) - 1; k >= 0; --k)
                 if (tileID >= static_cast<unsigned int>(m_tilesets[k].firstGid))
                 {
                     tsIndex = k;
@@ -57,8 +57,8 @@ void PrisonMap::BuildVertexArray(LayerRenderData& renderData, const std::vector<
             if (tsIndex == -1) continue;
             const auto& ts = m_tilesets[tsIndex];
             unsigned int localID = tileID - ts.firstGid;
-            int tv = localID % ts.columns;
-            int tu = localID / ts.columns;
+            int tv = static_cast<int>(localID) % ts.columns;
+            int tu = static_cast<int>(localID) / ts.columns;
 
             if (tempArrays.find(tsIndex) == tempArrays.end()) tempArrays[tsIndex].setPrimitiveType(sf::Quads);
             sf::Vertex quad[4];
@@ -134,20 +134,20 @@ bool PrisonMap::Load(const std::string& mapFilepath)
     if (!m_mapData.GetWallsLayer().empty())
         BuildVertexArray(m_wallsRender, m_mapData.GetWallsLayer());
 
-    if (!m_mapData.GetUsiLayer().empty())
-        BuildVertexArray(m_usiRender, m_mapData.GetUsiLayer());
+    if (!m_mapData.GetDoorLayer().empty())
+        BuildVertexArray(m_doorRender, m_mapData.GetDoorLayer());
 
-    if (!m_mapData.GetPatLayer().empty())
-        BuildVertexArray(m_patRender, m_mapData.GetPatLayer());
+    if (!m_mapData.GetBedLayer().empty())
+        BuildVertexArray(m_bedRender, m_mapData.GetBedLayer());
 
-    if (!m_mapData.GetAfaraLayer().empty())
-        BuildVertexArray(m_afaraRender, m_mapData.GetAfaraLayer());
+    if (!m_mapData.GetOutsideLayer().empty())
+        BuildVertexArray(m_outsideRender, m_mapData.GetOutsideLayer());
 
-    if (!m_mapData.GetMuncaLayer().empty())
-        BuildVertexArray(m_muncaRender, m_mapData.GetMuncaLayer());
+    if (!m_mapData.GetWorkLayer().empty())
+        BuildVertexArray(m_workRender, m_mapData.GetWorkLayer());
 
-    if (!m_mapData.GetDulapLayer().empty())
-        BuildVertexArray(m_dulapRender, m_mapData.GetDulapLayer());
+    if (!m_mapData.GetStashLayer().empty())
+        BuildVertexArray(m_stashRender, m_mapData.GetStashLayer());
 
     const auto TW = static_cast<float>(m_mapData.GetTileWidth());
     const auto TH = static_cast<float>(m_mapData.GetTileHeight());
@@ -184,12 +184,12 @@ void PrisonMap::draw(sf::RenderTarget& target, sf::RenderStates states) const
         }
     };
     drawLayer(m_groundRender);
-    drawLayer(m_muncaRender);
-    drawLayer(m_dulapRender);
+    drawLayer(m_workRender);
+    drawLayer(m_stashRender);
     drawLayer(m_wallsRender);
-    drawLayer(m_afaraRender);
-    drawLayer(m_patRender);
-    drawLayer(m_usiRender);
+    drawLayer(m_outsideRender);
+    drawLayer(m_bedRender);
+    drawLayer(m_doorRender);
 }
 
 bool PrisonMap::IsSolidWall(float x, float y) const
@@ -200,9 +200,9 @@ bool PrisonMap::IsSolidWall(float x, float y) const
 
     int idx = tileX + tileY * m_mapData.GetWidth();
     int wallId = m_mapData.GetWallsLayer()[idx] & 0x1FFFFFFF;
-    int bedId = m_mapData.GetPatLayer()[idx] & 0x1FFFFFFF;
-    int muncaId = m_mapData.GetMuncaLayer()[idx] & 0x1FFFFFFF;
-    int dulapId = m_mapData.GetDulapLayer()[idx] & 0x1FFFFFFF;
+    int bedId = m_mapData.GetBedLayer()[idx] & 0x1FFFFFFF;
+    int muncaId = m_mapData.GetWorkLayer()[idx] & 0x1FFFFFFF;
+    int dulapId = m_mapData.GetStashLayer()[idx] & 0x1FFFFFFF;
     return (wallId != 0 || bedId != 0 || muncaId != 0 || dulapId != 0);
 }
 
@@ -212,18 +212,18 @@ bool PrisonMap::IsWardenDoor(float x, float y) const
     int tileY = static_cast<int>(y) / m_mapData.GetTileHeight();
     if (tileX < 0 || tileX >= m_mapData.GetWidth() || tileY < 0 || tileY >= m_mapData.GetHeight()) return false;
     int idx = tileX + tileY * m_mapData.GetWidth();
-    int doorId = m_mapData.GetUsiLayer()[idx] & 0x1FFFFFFF;
+    int doorId = m_mapData.GetDoorLayer()[idx] & 0x1FFFFFFF;
     return (doorId == 442);
 }
 
-bool PrisonMap::IsDulap(float x, float y) const
+bool PrisonMap::IsStash(float x, float y) const
 {
     int tileX = static_cast<int>(x) / m_mapData.GetTileWidth();
     int tileY = static_cast<int>(y) / m_mapData.GetTileHeight();
     if (tileX < 0 || tileX >= m_mapData.GetWidth() || tileY < 0 || tileY >= m_mapData.GetHeight()) return false;
     int idx = tileX + tileY * m_mapData.GetWidth();
-    if (m_mapData.GetDulapLayer().empty()) return false;
-    int dulapId = m_mapData.GetDulapLayer()[idx] & 0x1FFFFFFF;
+    if (m_mapData.GetStashLayer().empty()) return false;
+    int dulapId = m_mapData.GetStashLayer()[idx] & 0x1FFFFFFF;
     return (dulapId != 0);
 }
 
@@ -275,7 +275,7 @@ bool PrisonMap::IsOutside(float x, float y) const
     if (tileX < 0 || tileX >= m_mapData.GetWidth() || tileY < 0 || tileY >= m_mapData.GetHeight()) return true;
 
     int idx = tileX + tileY * m_mapData.GetWidth();
-    int afaraId = m_mapData.GetAfaraLayer()[idx] & 0x1FFFFFFF;
+    int afaraId = m_mapData.GetOutsideLayer()[idx] & 0x1FFFFFFF;
     return (afaraId != 0);
 }
 
@@ -286,7 +286,7 @@ class AStarNode
 private:
     int x, y; // coordonate
     float f, g, h; // f = g + h
-    std::shared_ptr<AStarNode> parent; // retin parintele pentru a reface drumul
+    std::shared_ptr<AStarNode> parent; // keep parent to retrace path
 
 public:
     AStarNode(int xp, int yp) : x(xp), y(yp), f(0), g(0), h(0), parent(nullptr) {}
@@ -400,7 +400,7 @@ std::vector<sf::Vector2f> PrisonMap::FindPath(sf::Vector2f startPos, sf::Vector2
     {
         auto current = openSet.top(); // scot cel mai promitator nod
         openSet.pop();
-        if (current->GetX() == targetX && current->GetY() == targetY) // daca am ajuns la tinta
+        if (current->GetX() == targetX && current->GetY() == targetY) // if we reached the target
         {
             auto curr = current;
             while (curr != nullptr) // facem drumul de la sfarsit la inceput
@@ -427,7 +427,7 @@ std::vector<sf::Vector2f> PrisonMap::FindPath(sf::Vector2f startPos, sf::Vector2
             float gCost = current->GetG() + 1.f;
             auto hCost = static_cast<float>(std::abs(nx - targetX) + std::abs(ny - targetY)); // manhattan distance
             float fCost = gCost + hCost; // costul total
-            if (allNodes.find(nIndex) == allNodes.end() || fCost < allNodes[nIndex]->GetF()) // daca este mai bun costul sau nu am fost
+            if (allNodes.find(nIndex) == allNodes.end() || fCost < allNodes[nIndex]->GetF()) // if the cost is better or we haven't visited
             {
                 auto neighbor = std::make_shared<AStarNode>(nx, ny);
                 neighbor->SetG(gCost);

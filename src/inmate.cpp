@@ -21,7 +21,7 @@ Inmate::Inmate(std::string nameParam)
 
 void Inmate::GenerateDailyItems()
 {
-    // Goleste inventarul
+    // Empty inventory
     std::vector<Item> emptyList;
     inventory.SetItems(emptyList);
     // Genereaza 1-2 iteme random

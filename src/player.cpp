@@ -15,12 +15,12 @@ Player::Player(std::string nameParam)
 {
     health = 100;
     maxHealth = 100;
-    power = 100; // temporar pentru testare
+    power = 100; // temporary for testing
     moveSpeed = 100.f;
     inventory.AddItem(Item("Duct Tape", false, false, 0));
     inventory.AddItem(Item("Shiv", true, true, 20));
     inventory.AddItem(Item("Pickaxe", true, true, 100));
-    inventory.AddItem(ItemFactory::GetInstance().CreateWardenKey()); // Adaugat temporar pentru testare
+    inventory.AddItem(ItemFactory::GetInstance().CreateWardenKey()); // Added temporarily for testing
 }
 
 void Player::TakeDamage(short amount)

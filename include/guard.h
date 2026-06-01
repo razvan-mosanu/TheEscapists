@@ -26,7 +26,7 @@ private:
 
 public:
     explicit Guard(std::string name);
-    ~Guard() override = default; /// override sa verifice daca destructorul din
+    ~Guard() override = default; /// override to check if destructor from
     /// clasa de baza are virtual
 
     void SetPath(const std::vector<sf::Vector2f> &path)
@@ -55,7 +55,7 @@ public:
     void SetAggro(std::shared_ptr<Player> p)
     {
         /// bug fix
-        /// doar daca se schimba tinta se face clear
+        /// only clear if the target changes
         if (aggroPlayer != p)
             currentPath.clear();
         aggroPlayer = p;

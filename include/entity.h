@@ -13,7 +13,7 @@ class PrisonMap;
 class Entity : public Subject {
 protected:
     std::string name;
-    sf::Vector2f position; // coordonate X si Y
+    sf::Vector2f position; // X and Y coordinates
     sf::Texture texture;
     sf::Sprite sprite;
     float moveSpeed;
@@ -32,23 +32,23 @@ protected:
 public:
     static int GetActiveEntities() { return activeEntities; }
     explicit Entity(std::string name);
-    virtual ~Entity(); // virtual pentru a nu avea memeory leak
+    virtual ~Entity(); // virtual to avoid memory leak
 
     virtual void InitGraphics(const std::string &texturePath, float startX, float startY, sf::Color tint);
 
-    // functii virtuale pure deci rezulta clasa abstracta
-    // nu pot instantia obiecte de acest tip
-    // sunt obligat sa fac aceste functii pentru clasele derivate
+    // pure virtual functions making this an abstract class
+    // cannot instantiate objects of this type
+    // must implement these functions for derived classes
     virtual void Update(float deltaTime, const PrisonMap &map) = 0;
     virtual void Draw(sf::RenderWindow &window) const = 0;
     virtual std::shared_ptr<Entity> Clone() const = 0;
 
 public:
-    // nu o poate modifica nimeni
+    // cannot be modified
     void Display(std::ostream &os) const { Print(os); }
 
-    // nu e virtuala pura pentru ca nu toata lumea interactioneaza
-    virtual void Interact(Entity * /*other*/) {} // doar cand il folosesc decomentez acolo unde il scriu
+    // not pure virtual because not everyone interacts
+    virtual void Interact(Entity * /*other*/) {} // uncomment when used
     const std::string &GetName() const { return name; }
     sf::Vector2f GetPosition() const { return position; }
     void SetPosition(sf::Vector2f pos)

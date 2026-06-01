@@ -399,7 +399,7 @@ void GameManager::DrawTrade(sf::RenderWindow &window, const std::shared_ptr<clas
     sf::View uiView(sf::FloatRect(0.f, 0.f, 800.f, 600.f));
     window.setView(uiView);
 
-    // Fundal pentru trade
+    // Trade background
     sf::RectangleShape bg(sf::Vector2f(600.f, 400.f));
     bg.setFillColor(sf::Color(20, 20, 30, 240));
     bg.setOutlineColor(sf::Color(150, 100, 50));
@@ -600,7 +600,7 @@ void GameManager::Run(sf::RenderWindow &window)
                                         // Attempt to add to player inventory
                                         if (playerPtr->CollectItem(items[i]))
                                         {
-                                            playerPtr->SpendMoney(price);
+                                            playerPtr->SpendMoney(static_cast<short>(price));
                                             items.erase(items.begin() + i);
                                             tradingInmate->GetInventory().SetItems(items);
                                             dialogueText = "Purchased for $" + std::to_string(price) + "!";
@@ -641,7 +641,7 @@ void GameManager::Run(sf::RenderWindow &window)
                         {
                             int col = i % 4;
                             int row = i / 4;
-                            sf::FloatRect slotBounds(pxStart + col * 110.f, pyStart + row * 80.f, 90.f, 60.f);
+                            sf::FloatRect slotBounds(pxStart + static_cast<float>(col) * 110.f, pyStart + static_cast<float>(row) * 80.f, 90.f, 60.f);
                             if (slotBounds.contains(mousePosScreen.x, mousePosScreen.y) && i < static_cast<int>(pItems.size()))
                             {
                                 if (m_playerStash.AddItem(pItems[i]))
@@ -658,7 +658,7 @@ void GameManager::Run(sf::RenderWindow &window)
                         {
                             int col = i % 4;
                             int row = i / 4;
-                            sf::FloatRect slotBounds(sxStart + col * 110.f, syStart + row * 80.f, 90.f, 60.f);
+                            sf::FloatRect slotBounds(sxStart + static_cast<float>(col) * 110.f, syStart + static_cast<float>(row) * 80.f, 90.f, 60.f);
                             if (slotBounds.contains(mousePosScreen.x, mousePosScreen.y) && i < static_cast<int>(sItems.size()))
                             {
                                 if (playerPtr->CollectItem(sItems[i]))
@@ -772,7 +772,7 @@ void GameManager::Run(sf::RenderWindow &window)
                                 sf::Vector2f facing = playerPtr->GetFacingDir();
                                 float targetX = px + facing.x * 20.f;
                                 float targetY = py + facing.y * 20.f;
-                                if (map.IsDulap(targetX, targetY))
+                                if (map.IsStash(targetX, targetY))
                                 {
                                     state = GameState::Stash;
                                 }
@@ -848,7 +848,7 @@ void GameManager::Run(sf::RenderWindow &window)
                                                 // Sansa de drop Warden Key cand bate un gardian
                                                 if (guard->RollForWardenKeyDrop())
                                                 {
-                                                    playerPtr->CollectItem(ItemFactory::GetInstance().CreateWardenKey());
+                                                    playerPtr->CollectItem(ItemFactory::CreateWardenKey());
                                                     dialogueText = "You knocked out a guard and found a Warden Key!";
                                                 }
                                             }
@@ -857,7 +857,7 @@ void GameManager::Run(sf::RenderWindow &window)
                                         else if (auto warden = std::dynamic_pointer_cast<Warden>(entity))
                                         {
                                             if (!entity->IsKnockedOut()) warden->SetAggro(playerPtr);
-                                            // Fara Heat, asa ca politistii nu se baga!
+                                            // No Heat, so cops won't intervene!
                                             dialogueText = entity->IsKnockedOut()
                                                                ? warden->GetName() + " is knocked out!"
                                                                : "You punched the WARDEN!";
@@ -981,7 +981,7 @@ void GameManager::Run(sf::RenderWindow &window)
                     "          (Press 'S' again to close)",
                     font, 18);
                 ctrlText.setFillColor(sf::Color(220, 220, 230));
-                ctrlText.setPosition(180.f, 100.f); // Mutat mai sus pentru a incapea tot textul
+                ctrlText.setPosition(180.f, 100.f); // Moved up to fit all text
                 window.draw(ctrlText);
             }
             window.display();
@@ -1035,7 +1035,7 @@ void GameManager::Run(sf::RenderWindow &window)
             if (inGameTime >= 24.0f)
             {
                 inGameTime -= 24.0f;
-                // O noua zi - regeneram itemele detinutilor
+                // A new day - regenerate inmate items
                 for (auto &entity : entities)
                     if (auto inmate = std::dynamic_pointer_cast<Inmate>(entity)) inmate->GenerateDailyItems();
             }
@@ -1074,8 +1074,8 @@ void GameManager::Run(sf::RenderWindow &window)
                     std::vector<Entity*> toSearch;
                     for (int i = 0; i < 2 && !eligiblePrisoners.empty(); ++i)
                     {
-                        int r = RandomGenerator::GetInstance().GetInt(0, eligiblePrisoners.size() - 1);
-                        toSearch.push_back(eligiblePrisoners[r]);
+                        int r = RandomGenerator::GetInstance().GetInt(0, static_cast<int>(eligiblePrisoners.size() - 1));
+                        toSearch.push_back(eligiblePrisoners[static_cast<size_t>(r)]);
                         eligiblePrisoners.erase(eligiblePrisoners.begin() + r);
                     }
                     size_t sIdx = 0;
@@ -1093,7 +1093,7 @@ void GameManager::Run(sf::RenderWindow &window)
                 previousRoutine = currentRoutine;
             }
 
-            // Utilizare instantiere 2 a template-ului de functie
+            // Use instance 2 of function template
             std::shared_ptr<Warden> wardenPtr = FindEntityByType<Warden>(entities);
             for (auto &entity : entities)
             {
@@ -1183,7 +1183,7 @@ void GameManager::DrawStashMenu(sf::RenderWindow &window, const std::shared_ptr<
     sf::View uiView(sf::FloatRect(0.f, 0.f, 800.f, 600.f));
     window.setView(uiView);
 
-    // Fundal
+    // Background
     sf::RectangleShape bg(sf::Vector2f(600.f, 500.f));
     bg.setFillColor(sf::Color(20, 20, 30, 240));
     bg.setOutlineColor(sf::Color(100, 150, 200));
@@ -1229,7 +1229,7 @@ void GameManager::DrawStashMenu(sf::RenderWindow &window, const std::shared_ptr<
         }
     }
 
-    sf::Text stashTitle("STASH (Dulap)", font, 20);
+    sf::Text stashTitle("STASH", font, 20);
     stashTitle.setFillColor(sf::Color::Yellow);
     stashTitle.setPosition(120.f, 290.f);
     window.draw(stashTitle);

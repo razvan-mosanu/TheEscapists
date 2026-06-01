@@ -12,13 +12,13 @@ class ItemFactory : public Singleton<ItemFactory>
 private:
     ItemFactory() = default;
 public:
-    Item CreateWardenKey();
-    Item CreateWeapon();
-    Item CreateTool();
-    Item CreateIronIngot();
-    Item CreateStick();
-    Item CreateRope();
-    Item CreateDuctTape();
+    static Item CreateWardenKey();
+    static Item CreateWeapon();
+    static Item CreateTool();
+    static Item CreateIronIngot();
+    static Item CreateStick();
+    static Item CreateRope();
+    static Item CreateDuctTape();
 };
 
 #endif // ITEM_FACTORY_H
