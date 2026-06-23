@@ -17,7 +17,6 @@ public:
     bool IsContraband() const;
     bool Degrade(short percent);
     short GetDurability() const;
-    void SharpenItem();
     const std::string& GetName() const;
     friend std::ostream& operator<<(std::ostream& os, const Item &ob);
 };

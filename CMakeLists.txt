@@ -47,7 +47,6 @@ add_executable(${MAIN_EXECUTABLE_NAME}
     src/inventory.cpp
     src/item.cpp
     src/player.cpp
-    src/cell.cpp
     src/guard.cpp
     src/prison_map.cpp
     src/entity.cpp
@@ -55,6 +54,7 @@ add_executable(${MAIN_EXECUTABLE_NAME}
     src/exceptions.cpp
     src/game_manager.cpp
     src/warden.cpp
+    src/item_factory.cpp
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

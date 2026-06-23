@@ -1,7 +1,9 @@
 #include "inmate.h"
 #include "player.h"
+#include "item_factory.h"
 #include <iostream>
 #include <utility>
+#include "utils.h"
 #include <cmath>
 
 Inmate::Inmate(std::string nameParam)
@@ -14,6 +16,26 @@ Inmate::Inmate(std::string nameParam)
     health    = 100;
     maxHealth = 100;
     power     = 40;
+    GenerateDailyItems();
+}
+
+void Inmate::GenerateDailyItems()
+{
+    // Empty inventory
+    std::vector<Item> emptyList;
+    inventory.SetItems(emptyList);
+    // Genereaza 1-2 iteme random
+    int numItems = RandomGenerator::GetInstance().GetInt(1, 2);
+    for (int i = 0; i < numItems; ++i)
+    {
+        int chance = RandomGenerator::GetInstance().GetInt(1, 100);
+        if (chance < 20) inventory.AddItem(ItemFactory::GetInstance().CreateWeapon());
+        else if (chance < 40) inventory.AddItem(ItemFactory::GetInstance().CreateTool());
+        else if (chance < 60) inventory.AddItem(ItemFactory::GetInstance().CreateIronIngot());
+        else if (chance < 80) inventory.AddItem(ItemFactory::GetInstance().CreateStick());
+        else if (chance < 90) inventory.AddItem(ItemFactory::GetInstance().CreateRope());
+        else inventory.AddItem(ItemFactory::GetInstance().CreateDuctTape());
+    }
 }
 
 void Inmate::Interact(Entity* other)
@@ -44,7 +66,7 @@ void Inmate::Update(float deltaTime, const PrisonMap& map)
         }
         else if (dist > 20.f)
         {
-            if (wanderPath.empty() || GetRandomInt(0, 59) == 0)
+            if (wanderPath.empty() || RandomGenerator::GetInstance().GetInt(0, 59) == 0)
                 wanderPath = map.FindPath(this->GetCenter(), aggroPlayer->GetCenter());
         }
         else
@@ -77,8 +99,8 @@ void Inmate::Update(float deltaTime, const PrisonMap& map)
             {
                 breakfastState = 1;
                 SetExactTarget(sf::Vector2f(
-                    (21.f + static_cast<float>(GetRandomInt(0, 3))) * 16.f + 8.f,
-                    (6.f + static_cast<float>(GetRandomInt(0, 2))) * 16.f + 8.f
+                    (21.f + static_cast<float>(RandomGenerator::GetInstance().GetInt(0, 3))) * 16.f + 8.f,
+                    (6.f + static_cast<float>(RandomGenerator::GetInstance().GetInt(0, 2))) * 16.f + 8.f
                     ));
             }
             else if (breakfastState == 1 && hasTargetZone)
@@ -95,7 +117,7 @@ void Inmate::Update(float deltaTime, const PrisonMap& map)
             wanderTimer -= deltaTime;
             if (wanderTimer <= 0.f)
             {
-                wanderTimer = 2.0f + static_cast<float>(GetRandomInt(0, 99)) / 50.f;
+                wanderTimer = 2.0f + static_cast<float>(RandomGenerator::GetInstance().GetInt(0, 99)) / 50.f;
                 bool goodposition = false;
                 float cx = 0.f;
                 float cy = 0.f;
@@ -109,17 +131,18 @@ void Inmate::Update(float deltaTime, const PrisonMap& map)
                         int startY = static_cast<int>(targetZone.top) / 16;
                         int width  = static_cast<int>(targetZone.width) / 16;
                         int height = static_cast<int>(targetZone.height) / 16;
-                        tileX = startX + (width  > 0 ? GetRandomInt(0, width - 1)  : 0);
-                        tileY = startY + (height > 0 ? GetRandomInt(0, height - 1) : 0);
+                        tileX = startX + (width  > 0 ? RandomGenerator::GetInstance().GetInt(0, width - 1)  : 0);
+                        tileY = startY + (height > 0 ? RandomGenerator::GetInstance().GetInt(0, height - 1) : 0);
                     }
                     else
                     {
-                        tileX = 2 + GetRandomInt(0, (map.GetWidthInPixels() / 16) - 5);
-                        tileY = 2 + GetRandomInt(0, (map.GetHeightInPixels() / 16) - 5);
+                        tileX = 2 + RandomGenerator::GetInstance().GetInt(0, (map.GetWidthInPixels() / 16) - 5);
+                        tileY = 2 + RandomGenerator::GetInstance().GetInt(0, (map.GetHeightInPixels() / 16) - 5);
                     }
                     cx = static_cast<float>(tileX) * 16.f + 8.f;
                     cy = static_cast<float>(tileY) * 16.f + 8.f;
                     if (map.IsSolidWall(cx, cy)) goodposition = false;
+                    else if (map.GetZoneAt(cx, cy) == "WardenOffice") goodposition = false;
                 }
                 wanderPath = map.FindPath(this->GetCenter(), sf::Vector2f(cx, cy));
             }

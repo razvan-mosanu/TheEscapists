@@ -76,12 +76,6 @@ void Inventory::RemoveItem(short pos)
     currentItemCount--;
 }
 
-void Inventory::Swap(short pos1, short pos2)
-{
-    if (pos1 < 0 || pos2 < 0 || pos1 >= currentItemCount || pos2 >= currentItemCount) return;
-    std::swap(items[pos1], items[pos2]);
-}
-
 int Inventory::FindItem(const std::string &name) const
 {
     for (short i = 0; i < currentItemCount; i++)

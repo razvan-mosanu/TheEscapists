@@ -4,14 +4,6 @@
 #include <random>
 
 //for events
-//better than rand()
-int Entity::GetRandomInt(int min, int max)
-{
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    std::uniform_int_distribution<> distrib(min, max);
-    return distrib(gen);
-}
 
 int Entity::activeEntities = 0;
 

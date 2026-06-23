@@ -48,14 +48,6 @@ std::ostream& operator<<(std::ostream& os, const Item &ob)
     return os;
 }
 
-void Item::SharpenItem()
-{
-    if(name != "Toothbrush" && name != "Comb") return;
-    name = "Knife from " + name;
-    isContraband = true;
-    isMetal = false;
-}
-
 const std::string& Item::GetName() const
 {
     return name;
