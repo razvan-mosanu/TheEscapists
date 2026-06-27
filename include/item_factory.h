@@ -5,7 +5,7 @@
 
 #include "utils.h"
 
-// Design Pattern 2: Factory Pattern + Tema 3: Singleton Instance 1
+// Design Pattern 2: Factory Pattern
 class ItemFactory : public Singleton<ItemFactory>
 {
     friend class Singleton<ItemFactory>;

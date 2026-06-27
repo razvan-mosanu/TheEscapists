@@ -772,10 +772,7 @@ void GameManager::Run(sf::RenderWindow &window)
                                 sf::Vector2f facing = playerPtr->GetFacingDir();
                                 float targetX = px + facing.x * 20.f;
                                 float targetY = py + facing.y * 20.f;
-                                if (map.IsStash(targetX, targetY))
-                                {
-                                    state = GameState::Stash;
-                                }
+                                if (map.IsStash(targetX, targetY)) state = GameState::Stash;
                             }
                         }
                     }
